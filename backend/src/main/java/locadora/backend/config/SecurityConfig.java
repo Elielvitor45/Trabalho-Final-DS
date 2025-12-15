@@ -40,6 +40,7 @@ public class SecurityConfig {
                 // Regras de autorização
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        // .requestMatchers("/api/usuarios/**").authenticated()
                         .anyRequest().authenticated());
 
         return http.build();
