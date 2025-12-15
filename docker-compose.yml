@@ -1,0 +1,69 @@
+services:
+  # MySQL Database
+  mysql-db:
+    image: mysql:8.0
+    container_name: locadora-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: locadora_db
+      MYSQL_USER: locadora_user
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - locadora-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Spring Boot Backend
+  spring-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: locadora-backend
+    restart: unless-stopped
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: mysql-db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: locadora_db
+      MYSQL_USERNAME: locadora_user
+      MYSQL_PASSWORD: 1234
+      JWT_SECRET: locadora-secret-key-super-segura-mude-em-producao
+      JWT_EXPIRATION: 86400000
+    ports:
+      - "8080:8080"
+    networks:
+      - locadora-network
+
+  # Angular Frontend
+  angular-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: locadora-frontend
+    restart: unless-stopped
+    depends_on:
+      - spring-backend
+    ports:
+      - "4200:80"
+    networks:
+      - locadora-network
+
+volumes:
+  mysql_data:
+    name: locadora_mysql_data
+
+networks:
+  locadora-network:
+    name: locadora_network
+    driver: bridge
