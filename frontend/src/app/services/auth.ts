@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Jwt } from './jwt';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { AuthResponse, LoginRequest, RegisterRequest } from '../dto/auth.dto';
+import { AuthResponse, EstatisticasDTO, LocacaoDTO, LoginRequest, RegisterRequest } from '../dto/auth.dto';
 import { Usuario, UsuarioPerfil } from '../models/user.model';
 
 @Injectable({
@@ -11,6 +11,7 @@ import { Usuario, UsuarioPerfil } from '../models/user.model';
 })
 export class Auth {
   private apiUrl = 'http://localhost:8080/api/auth';
+  private usuariosUrl = 'http://localhost:8080/api/usuarios';
   private currentUserSubject = new BehaviorSubject<Usuario | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -45,7 +46,27 @@ export class Auth {
   }
 
   getUserProfile(): Observable<UsuarioPerfil> {
-    return this.http.get<UsuarioPerfil>('http://localhost:8080/api/usuarios/perfil');
+    return this.http.get<UsuarioPerfil>(`${this.usuariosUrl}/perfil`);
+  }
+
+  updateEndereco(data: any): Observable<any> {
+    return this.http.put(`${this.usuariosUrl}/endereco`, data);
+  }
+
+  /**
+   * Busca o histórico de locações do usuário autenticado
+   * GET /api/usuarios/locacoes
+   */
+  getHistoricoLocacoes(): Observable<LocacaoDTO[]> {
+    return this.http.get<LocacaoDTO[]>(`${this.usuariosUrl}/locacoes`);
+  }
+
+  /**
+   * Busca as estatísticas do usuário autenticado
+   * GET /api/usuarios/estatisticas
+   */
+  getEstatisticas(): Observable<EstatisticasDTO> {
+    return this.http.get<EstatisticasDTO>(`${this.usuariosUrl}/estatisticas`);
   }
 
   private handleAuthResponse(response: AuthResponse): void {
@@ -74,9 +95,4 @@ export class Auth {
   getCurrentUser(): Usuario | null {
     return this.currentUserSubject.value;
   }
-
-  updateEndereco(data: any): Observable<any> {
-    return this.http.put('http://localhost:8080/api/usuarios/endereco', data);
-  }
-
 }

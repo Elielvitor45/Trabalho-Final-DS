@@ -38,6 +38,22 @@ export class Home implements OnInit {
     this.router.navigate(['/login']);
   }
 
+  /**
+   * Navega para a página de pesquisa de veículos
+   */
+  goToVeiculos(): void {
+    this.router.navigate(['/veiculos']);
+  }
+
+  /**
+   * Navega para pesquisa com filtro de categoria
+   */
+  goToVeiculosPorCategoria(categoria: string): void {
+    this.router.navigate(['/veiculos'], { 
+      queryParams: { categoria: categoria } 
+    });
+  }
+
   logout(): void {
     this.authService.logout();
   }

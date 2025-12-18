@@ -1,0 +1,161 @@
+<div class="pesquisa-container">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-content">
+      <div class="logo" (click)="goToHome()">
+        <h1>🚗 LocadoraMax</h1>
+      </div>
+
+      <div class="nav-links">
+        <a (click)="goToHome()" style="cursor: pointer;">Home</a>
+        
+        <div *ngIf="isAuthenticated">
+          <span class="user-name-link" (click)="goToPerfil()">
+            Olá, {{ firstName }}
+          </span>
+          <button class="btn-secondary" (click)="logout()">Sair</button>
+        </div>
+        
+        <button *ngIf="!isAuthenticated" class="btn-primary" (click)="goToLogin()">
+          Entrar
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Encontre o Veículo Perfeito</h1>
+      <p class="hero-subtitle">Explore nossa frota completa e reserve agora mesmo!</p>
+    </div>
+  </section>
+
+  <!-- Search and Filters -->
+  <section class="filters-section">
+    <div class="container">
+      <!-- Barra de Pesquisa -->
+      <div class="search-bar">
+        <input 
+          type="text" 
+          [(ngModel)]="termoPesquisa"
+          (keyup.enter)="pesquisar()"
+          placeholder="Buscar por modelo, marca ou categoria..."
+          class="search-input"
+        >
+        <button class="btn-search" (click)="pesquisar()">
+          🔍 Buscar
+        </button>
+      </div>
+
+      <!-- Filtros de Categoria -->
+      <div class="category-filters">
+        <button 
+          class="filter-btn"
+          [class.active]="categoriaSelecionada === 'Todos'"
+          (click)="filtrarPorCategoria('Todos')">
+          Todos
+        </button>
+        
+        <button 
+          *ngFor="let categoria of categorias"
+          class="filter-btn"
+          [class.active]="categoriaSelecionada === categoria"
+          (click)="filtrarPorCategoria(categoria)">
+          {{ categoria }}
+        </button>
+        
+        <button 
+          *ngIf="categoriaSelecionada !== 'Todos' || termoPesquisa"
+          class="btn-clear-filters"
+          (click)="limparFiltros()">
+          ✖ Limpar Filtros
+        </button>
+      </div>
+
+      <!-- Resultados Info -->
+      <div class="results-info">
+        <p *ngIf="!loading">
+          <strong>{{ veiculosFiltrados.length }}</strong> 
+          {{ veiculosFiltrados.length === 1 ? 'veículo encontrado' : 'veículos encontrados' }}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando veículos...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !loading" class="error-container">
+    <div class="error-message">{{ errorMessage }}</div>
+    <button class="btn-primary" (click)="loadVeiculos()">Tentar Novamente</button>
+  </div>
+
+  <!-- Vehicles Grid -->
+  <section class="vehicles-section" *ngIf="!loading && !errorMessage">
+    <div class="container">
+      <!-- Nenhum resultado -->
+      <div *ngIf="veiculosFiltrados.length === 0" class="no-results">
+        <div class="no-results-icon">🚗</div>
+        <h2>Nenhum veículo encontrado</h2>
+        <p>Tente ajustar seus filtros ou termos de pesquisa</p>
+        <button class="btn-primary" (click)="limparFiltros()">Ver Todos os Veículos</button>
+      </div>
+
+      <!-- Grid de Veículos -->
+      <div *ngIf="veiculosFiltrados.length > 0" class="vehicles-grid">
+        <div *ngFor="let veiculo of veiculosFiltrados" class="vehicle-card">
+          <!-- Badge de categoria -->
+          <div class="badge-categoria">{{ veiculo.categoria }}</div>
+          
+          <!-- Ícone do veículo -->
+          <div class="vehicle-image">
+            {{ getIconeCategoria(veiculo.categoria) }}
+          </div>
+          
+          <!-- Informações -->
+          <h3 class="vehicle-title">{{ veiculo.marca }} {{ veiculo.modelo }}</h3>
+          <p class="vehicle-year">Ano: {{ veiculo.ano }}</p>
+          
+          <!-- Descrição -->
+          <p class="vehicle-description" *ngIf="veiculo.descricao">
+            {{ veiculo.descricao }}
+          </p>
+          
+          <!-- Preço -->
+          <div class="vehicle-price">
+            {{ formatarValor(veiculo.valorDiaria) }}<span class="price-period">/dia</span>
+          </div>
+          
+          <!-- Informações Adicionais -->
+          <ul class="vehicle-features">
+            <li>✓ Placa: {{ veiculo.placa }}</li>
+            <li>✓ {{ veiculo.categoria }}</li>
+            <li *ngIf="veiculo.disponivel">✓ Disponível agora</li>
+          </ul>
+          
+          <!-- Botões de ação -->
+          <div class="vehicle-actions">
+            <button class="btn-details" (click)="verDetalhes(veiculo.id)">
+              Ver Detalhes
+            </button>
+            <button class="btn-rent" (click)="alugarVeiculo(veiculo.id)">
+              {{ isAuthenticated ? 'Alugar Agora' : 'Fazer Login' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 LocadoraMax. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+</div>

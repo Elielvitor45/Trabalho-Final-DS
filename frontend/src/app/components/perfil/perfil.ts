@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { UsuarioPerfil } from '../../models/user.model';
+import { EstatisticasDTO, LocacaoDTO } from '../../dto/auth.dto';
 
 @Component({
   selector: 'app-perfil',
@@ -21,6 +22,13 @@ export class Perfil implements OnInit {
   salvandoEndereco = false;
   enderecoForm!: FormGroup;
 
+  // Novas propriedades
+  locacoes: LocacaoDTO[] = [];
+  estatisticas: EstatisticasDTO | null = null;
+  loadingLocacoes = false;
+  loadingEstatisticas = false;
+  mostrarHistorico = false;
+
   constructor(
     private authService: Auth,
     private router: Router,
@@ -35,8 +43,9 @@ export class Perfil implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-
+    
     this.loadUserProfile();
+    this.loadEstatisticas();
   }
 
   initEnderecoForm(): void {
@@ -54,7 +63,6 @@ export class Perfil implements OnInit {
   loadUserProfile(): void {
     this.loading = true;
     this.errorMessage = '';
-    
     this.authService.getUserProfile().subscribe({
       next: (data) => {
         this.user = data;
@@ -66,7 +74,6 @@ export class Perfil implements OnInit {
         this.errorMessage = error.error?.message || 'Erro ao carregar perfil. Tente novamente.';
         this.loading = false;
         this.cdr.detectChanges();
-        
         if (error.status === 401 || error.status === 403) {
           this.authService.logout();
         }
@@ -74,13 +81,80 @@ export class Perfil implements OnInit {
     });
   }
 
+  // Nova função: carregar estatísticas
+  loadEstatisticas(): void {
+    this.loadingEstatisticas = true;
+    this.authService.getEstatisticas().subscribe({
+      next: (data) => {
+        this.estatisticas = data;
+        this.loadingEstatisticas = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar estatísticas:', error);
+        this.loadingEstatisticas = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // Nova função: carregar histórico de locações
+  loadHistoricoLocacoes(): void {
+    if (this.locacoes.length > 0) {
+      this.mostrarHistorico = !this.mostrarHistorico;
+      return;
+    }
+
+    this.loadingLocacoes = true;
+    this.authService.getHistoricoLocacoes().subscribe({
+      next: (data) => {
+        this.locacoes = data;
+        this.mostrarHistorico = true;
+        this.loadingLocacoes = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Erro ao carregar histórico:', error);
+        this.loadingLocacoes = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getStatusClass(status: string): string {
+    switch(status.toLowerCase()) {
+      case 'ativa':
+      case 'em andamento':
+        return 'status-ativa';
+      case 'finalizada':
+      case 'concluída':
+        return 'status-finalizada';
+      case 'cancelada':
+        return 'status-cancelada';
+      default:
+        return 'status-default';
+    }
+  }
+
+  formatarData(data: string): string {
+    if (!data) return '';
+    const date = new Date(data);
+    return date.toLocaleDateString('pt-BR');
+  }
+
+  formatarValor(valor: number): string {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valor);
+  }
+
   iniciarEdicaoEndereco(): void {
     this.editandoEndereco = true;
     this.successMessage = '';
     this.errorMessage = '';
-
+    
     if (this.user?.endereco) {
-      // Preencher formulário com dados existentes
       this.enderecoForm.patchValue({
         cep: this.user.endereco.cep,
         logradouro: this.user.endereco.logradouro,
@@ -91,7 +165,6 @@ export class Perfil implements OnInit {
         estado: this.user.endereco.estado
       });
     } else {
-      // Limpar formulário para novo endereço
       this.enderecoForm.reset();
     }
   }
@@ -108,20 +181,18 @@ export class Perfil implements OnInit {
       this.markFormAsTouched();
       return;
     }
-
+    
     this.salvandoEndereco = true;
     this.errorMessage = '';
     this.successMessage = '';
-
+    
     const enderecoData = this.enderecoForm.value;
-
+    
     this.authService.updateEndereco(enderecoData).subscribe({
       next: () => {
         this.successMessage = 'Endereço salvo com sucesso!';
         this.salvandoEndereco = false;
         this.editandoEndereco = false;
-        
-        // Recarregar perfil para mostrar dados atualizados
         setTimeout(() => {
           this.loadUserProfile();
           this.successMessage = '';

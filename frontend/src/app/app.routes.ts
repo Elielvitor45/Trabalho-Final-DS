@@ -1,3 +1,4 @@
+import { Component } from '@angular/core';
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
@@ -22,6 +23,15 @@ export const routes: Routes = [
         path: 'perfil',
         loadComponent: () => import('./components/perfil/perfil').then(m => m.Perfil)
     },
+    {
+        path: 'veiculos',
+        loadComponent: () => import('./components/pesquisa-veiculos/pesquisa-veiculos').then(m => m.PesquisaVeiculosComponent)
+    },
+    // {
+    //     path: 'veiculo/:id',
+    //     loadComponent: () => import('./components/pesquisa-veiculos/pesquisa-veiculos').then(m => m.DetalhesVeiculoComponent)
+    //     // TODO: Criar este componente depois
+    // },
     {
         path: '**',
         redirectTo: '/home'

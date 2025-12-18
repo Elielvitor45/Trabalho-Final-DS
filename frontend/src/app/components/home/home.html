@@ -2,12 +2,12 @@
   <!-- Navbar -->
   <nav class="navbar">
     <div class="nav-content">
-      <div class="logo">
+      <div class="logo" style="cursor: pointer;">
         <h1>🚗 LocadoraMax</h1>
       </div>
       <div class="nav-links">
         <a href="#servicos">Serviços</a>
-        <a href="#veiculos">Veículos</a>
+        <a (click)="goToVeiculos()" style="cursor: pointer;">Veículos</a>
         <a href="#contato">Contato</a>
 
         <!-- Se usuário NÃO estiver logado -->
@@ -34,8 +34,8 @@
         Preços acessíveis, atendimento de excelência.
       </p>
       <div class="hero-buttons">
-        <button class="btn-hero-primary">Começar Agora</button>
-        <button class="btn-hero-secondary">Ver Veículos</button>
+        <button class="btn-hero-primary" (click)="goToVeiculos()">Começar Agora</button>
+        <button class="btn-hero-secondary" (click)="goToVeiculos()">Ver Veículos</button>
       </div>
     </div>
   </section>
@@ -83,8 +83,11 @@
             <li>✓ Direção hidráulica</li>
             <li>✓ 4 portas</li>
           </ul>
-          <button class="btn-vehicle">Ver Disponíveis</button>
+          <button class="btn-vehicle" (click)="goToVeiculosPorCategoria('Econômico')">
+            Ver Disponíveis
+          </button>
         </div>
+        
         <div class="vehicle-card featured">
           <div class="badge">Mais Popular</div>
           <div class="vehicle-image">🚗</div>
@@ -95,8 +98,11 @@
             <li>✓ Porta-malas grande</li>
             <li>✓ 5 lugares</li>
           </ul>
-          <button class="btn-vehicle featured-btn">Ver Disponíveis</button>
+          <button class="btn-vehicle featured-btn" (click)="goToVeiculosPorCategoria('SUV')">
+            Ver Disponíveis
+          </button>
         </div>
+        
         <div class="vehicle-card">
           <div class="vehicle-image">🏎️</div>
           <h3>Luxo</h3>
@@ -106,7 +112,9 @@
             <li>✓ Interior sofisticado</li>
             <li>✓ Alto desempenho</li>
           </ul>
-          <button class="btn-vehicle">Ver Disponíveis</button>
+          <button class="btn-vehicle" (click)="goToVeiculosPorCategoria('Luxo')">
+            Ver Disponíveis
+          </button>
         </div>
       </div>
     </div>

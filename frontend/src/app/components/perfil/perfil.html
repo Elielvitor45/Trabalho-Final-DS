@@ -39,6 +39,7 @@
         {{ successMessage }}
       </div>
 
+      <!-- Informações Pessoais -->
       <div class="section">
         <h3 class="section-title">Informações Pessoais</h3>
 
@@ -107,11 +108,7 @@
           <div class="form-row">
             <div class="form-group form-group-small">
               <label>CEP</label>
-              <input 
-                type="text" 
-                formControlName="cep" 
-                placeholder="00000000"
-                maxlength="8"
+              <input type="text" formControlName="cep" placeholder="00000000" maxlength="8"
                 (input)="formatCEPInput($event)"
                 [class.invalid]="enderecoForm.get('cep')?.invalid && enderecoForm.get('cep')?.touched">
               <span class="error" *ngIf="enderecoForm.get('cep')?.invalid && enderecoForm.get('cep')?.touched">
@@ -121,12 +118,10 @@
 
             <div class="form-group">
               <label>Logradouro</label>
-              <input 
-                type="text" 
-                formControlName="logradouro" 
-                placeholder="Rua, Avenida..."
+              <input type="text" formControlName="logradouro" placeholder="Rua, Avenida..."
                 [class.invalid]="enderecoForm.get('logradouro')?.invalid && enderecoForm.get('logradouro')?.touched">
-              <span class="error" *ngIf="enderecoForm.get('logradouro')?.invalid && enderecoForm.get('logradouro')?.touched">
+              <span class="error"
+                *ngIf="enderecoForm.get('logradouro')?.invalid && enderecoForm.get('logradouro')?.touched">
                 Logradouro é obrigatório
               </span>
             </div>
@@ -135,10 +130,7 @@
           <div class="form-row">
             <div class="form-group form-group-small">
               <label>Número</label>
-              <input 
-                type="text" 
-                formControlName="numero" 
-                placeholder="123"
+              <input type="text" formControlName="numero" placeholder="123"
                 [class.invalid]="enderecoForm.get('numero')?.invalid && enderecoForm.get('numero')?.touched">
               <span class="error" *ngIf="enderecoForm.get('numero')?.invalid && enderecoForm.get('numero')?.touched">
                 Número é obrigatório
@@ -147,19 +139,13 @@
 
             <div class="form-group">
               <label>Complemento</label>
-              <input 
-                type="text" 
-                formControlName="complemento" 
-                placeholder="Apto, Sala... (opcional)">
+              <input type="text" formControlName="complemento" placeholder="Apto, Sala... (opcional)">
             </div>
           </div>
 
           <div class="form-group">
             <label>Bairro</label>
-            <input 
-              type="text" 
-              formControlName="bairro" 
-              placeholder="Bairro"
+            <input type="text" formControlName="bairro" placeholder="Bairro"
               [class.invalid]="enderecoForm.get('bairro')?.invalid && enderecoForm.get('bairro')?.touched">
             <span class="error" *ngIf="enderecoForm.get('bairro')?.invalid && enderecoForm.get('bairro')?.touched">
               Bairro é obrigatório
@@ -169,10 +155,7 @@
           <div class="form-row">
             <div class="form-group">
               <label>Cidade</label>
-              <input 
-                type="text" 
-                formControlName="cidade" 
-                placeholder="Cidade"
+              <input type="text" formControlName="cidade" placeholder="Cidade"
                 [class.invalid]="enderecoForm.get('cidade')?.invalid && enderecoForm.get('cidade')?.touched">
               <span class="error" *ngIf="enderecoForm.get('cidade')?.invalid && enderecoForm.get('cidade')?.touched">
                 Cidade é obrigatória
@@ -181,11 +164,7 @@
 
             <div class="form-group form-group-small">
               <label>Estado</label>
-              <input 
-                type="text" 
-                formControlName="estado" 
-                placeholder="SP"
-                maxlength="2"
+              <input type="text" formControlName="estado" placeholder="SP" maxlength="2"
                 style="text-transform: uppercase;"
                 [class.invalid]="enderecoForm.get('estado')?.invalid && enderecoForm.get('estado')?.touched">
               <span class="error" *ngIf="enderecoForm.get('estado')?.invalid && enderecoForm.get('estado')?.touched">
@@ -204,7 +183,96 @@
           </div>
         </form>
       </div>
-    </div>
+
+      <!-- ========== NOVAS SEÇÕES ========== -->
+
+      <!-- Seção de Estatísticas -->
+      <div class="section">
+        <h2 class="section-title">📊 Estatísticas</h2>
+
+        <div *ngIf="loadingEstatisticas" class="no-data">
+          <p>Carregando estatísticas...</p>
+        </div>
+
+        <div *ngIf="!loadingEstatisticas && estatisticas" class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">🚗</div>
+            <div class="stat-value">{{ estatisticas.totalLocacoes }}</div>
+            <div class="stat-label">Total de Locações</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value">{{ estatisticas.locacoesAtivas }}</div>
+            <div class="stat-label">Locações Ativas</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">🏁</div>
+            <div class="stat-value">{{ estatisticas.locacoesFinalizadas }}</div>
+            <div class="stat-label">Finalizadas</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value">{{ formatarValor(estatisticas.valorTotalGasto) }}</div>
+            <div class="stat-label">Total Gasto</div>
+          </div>
+        </div>
+
+        <div *ngIf="!loadingEstatisticas && !estatisticas" class="no-data">
+          <p>Nenhuma estatística disponível</p>
+        </div>
+      </div>
+
+      <!-- Seção de Histórico -->
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">📋 Histórico de Locações</h2>
+          <button class="btn-toggle-historico" (click)="loadHistoricoLocacoes()">
+            {{ mostrarHistorico ? '▼ Ocultar' : '▶ Ver Histórico' }}
+          </button>
+        </div>
+
+        <div *ngIf="loadingLocacoes" class="no-data">
+          <p>Carregando histórico...</p>
+        </div>
+
+        <div *ngIf="mostrarHistorico && !loadingLocacoes && locacoes.length > 0" class="historico-lista">
+          <div *ngFor="let locacao of locacoes" class="locacao-card">
+            <div class="locacao-header">
+              <h3 class="locacao-veiculo">{{ locacao.veiculoNome }}</h3>
+              <span class="locacao-status" [ngClass]="getStatusClass(locacao.status)">
+                {{ locacao.status }}
+              </span>
+            </div>
+
+            <div class="locacao-detalhes">
+              <div class="locacao-info">
+                <span class="info-icon">📅</span>
+                <span class="info-text">
+                  {{ formatarData(locacao.dataInicio) }} até {{ formatarData(locacao.dataFim) }}
+                </span>
+              </div>
+
+              <div class="locacao-info">
+                <span class="info-icon">💵</span>
+                <span class="info-text valor-destaque">
+                  {{ formatarValor(locacao.valorTotal) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="mostrarHistorico && !loadingLocacoes && locacoes.length === 0" class="no-data">
+          <p>Você ainda não possui locações</p>
+        </div>
+      </div>
+
+      <!-- ========== FIM DAS NOVAS SEÇÕES ========== -->
+
+    </div><!-- .perfil-content -->
 
     <!-- Actions -->
     <div class="perfil-actions">
@@ -215,5 +283,5 @@
         Sair da Conta
       </button>
     </div>
-  </div>
-</div>
+  </div><!-- .perfil-card -->
+</div><!-- .perfil-container -->

@@ -28,3 +28,20 @@ export interface AuthResponse {
   email: string;
   expiresIn: number;
 }
+
+export interface LocacaoDTO {
+  id: number;
+  veiculoNome: string;
+  veiculoModelo?: string;
+  dataInicio: string;
+  dataFim: string;
+  status: string;
+  valorTotal: number;
+}
+
+export interface EstatisticasDTO {
+  totalLocacoes: number;
+  locacoesAtivas: number;
+  locacoesFinalizadas: number;
+  valorTotalGasto: number;
+}
