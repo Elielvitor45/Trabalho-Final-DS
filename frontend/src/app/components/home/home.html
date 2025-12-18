@@ -1,0 +1,151 @@
+<div class="home-container">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-content">
+      <div class="logo">
+        <h1>🚗 LocadoraMax</h1>
+      </div>
+      <div class="nav-links">
+        <a href="#servicos">Serviços</a>
+        <a href="#veiculos">Veículos</a>
+        <a href="#contato">Contato</a>
+
+        <!-- Se usuário NÃO estiver logado -->
+        <button *ngIf="!isAuthenticated" class="btn-primary" (click)="goToLogin()">Entrar</button>
+
+        <!-- Se usuário estiver logado -->
+        <div *ngIf="isAuthenticated" style="display: flex; gap: 1rem; align-items: center;">
+          <span class="user-name-link" (click)="goToPerfil()">
+            Olá, {{ firstName }}
+          </span>
+          <button class="btn-secondary" (click)="logout()">Sair</button>
+        </div>
+
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Alugue o Carro Perfeito</h1>
+      <p class="hero-subtitle">
+        A maior seleção de veículos para sua viagem.
+        Preços acessíveis, atendimento de excelência.
+      </p>
+      <div class="hero-buttons">
+        <button class="btn-hero-primary">Começar Agora</button>
+        <button class="btn-hero-secondary">Ver Veículos</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Serviços -->
+  <section id="servicos" class="services">
+    <div class="container">
+      <h2 class="section-title">Nossos Serviços</h2>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">🚗</div>
+          <h3>Frota Diversificada</h3>
+          <p>Carros econômicos, SUVs e veículos de luxo</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">💰</div>
+          <h3>Melhores Preços</h3>
+          <p>Tarifas competitivas e sem taxas ocultas</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">⚡</div>
+          <h3>Processo Rápido</h3>
+          <p>Reserve online em poucos minutos</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">🛡️</div>
+          <h3>Seguro Completo</h3>
+          <p>Proteção total para sua tranquilidade</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categorias de Veículos -->
+  <section id="veiculos" class="vehicles">
+    <div class="container">
+      <h2 class="section-title">Categorias de Veículos</h2>
+      <div class="vehicles-grid">
+        <div class="vehicle-card">
+          <div class="vehicle-image">🚙</div>
+          <h3>Econômico</h3>
+          <p class="vehicle-price">A partir de R$ 120/dia</p>
+          <ul class="vehicle-features">
+            <li>✓ Ar condicionado</li>
+            <li>✓ Direção hidráulica</li>
+            <li>✓ 4 portas</li>
+          </ul>
+          <button class="btn-vehicle">Ver Disponíveis</button>
+        </div>
+        <div class="vehicle-card featured">
+          <div class="badge">Mais Popular</div>
+          <div class="vehicle-image">🚗</div>
+          <h3>SUV</h3>
+          <p class="vehicle-price">A partir de R$ 280/dia</p>
+          <ul class="vehicle-features">
+            <li>✓ Espaço amplo</li>
+            <li>✓ Porta-malas grande</li>
+            <li>✓ 5 lugares</li>
+          </ul>
+          <button class="btn-vehicle featured-btn">Ver Disponíveis</button>
+        </div>
+        <div class="vehicle-card">
+          <div class="vehicle-image">🏎️</div>
+          <h3>Luxo</h3>
+          <p class="vehicle-price">A partir de R$ 450/dia</p>
+          <ul class="vehicle-features">
+            <li>✓ Tecnologia premium</li>
+            <li>✓ Interior sofisticado</li>
+            <li>✓ Alto desempenho</li>
+          </ul>
+          <button class="btn-vehicle">Ver Disponíveis</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contato -->
+  <section id="contato" class="contact">
+    <div class="container">
+      <h2 class="section-title">Entre em Contato</h2>
+      <div class="contact-info">
+        <div class="contact-item">
+          <div class="contact-icon">📞</div>
+          <div>
+            <h3>Telefone</h3>
+            <p>(11) 9999-9999</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📧</div>
+          <div>
+            <h3>Email</h3>
+            <p>contato@locadoramax.com</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div>
+            <h3>Endereço</h3>
+            <p>Av. Paulista, 1578 - São Paulo/SP</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 LocadoraMax. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+</div>

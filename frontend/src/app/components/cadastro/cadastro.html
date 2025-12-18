@@ -1,0 +1,175 @@
+<div class="cadastro-container">
+  <div class="cadastro-card">
+    <div class="logo" (click)="goToHome()">
+      <h1>🚗 LocadoraMax</h1>
+      <p>Crie sua conta</p>
+    </div>
+
+    <form [formGroup]="cadastroForm" (ngSubmit)="onSubmit()">
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <div *ngIf="successMessage" class="success-message">
+        {{ successMessage }}
+      </div>
+
+      <!-- Dados Pessoais -->
+      <div class="section-title">Dados Pessoais</div>
+
+      <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" formControlName="nome" placeholder="Digite seu nome completo"
+          [class.invalid]="cadastroForm.get('nome')?.invalid && cadastroForm.get('nome')?.touched">
+        <span class="error" *ngIf="cadastroForm.get('nome')?.invalid && cadastroForm.get('nome')?.touched">
+          Nome deve ter no mínimo 3 caracteres
+        </span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>CPF</label>
+          <input type="text" formControlName="cpf" placeholder="00000000000" maxlength="11" (input)="formatCPF($event)"
+            [class.invalid]="cadastroForm.get('cpf')?.invalid && cadastroForm.get('cpf')?.touched">
+          <span class="error" *ngIf="cadastroForm.get('cpf')?.invalid && cadastroForm.get('cpf')?.touched">
+            CPF deve ter 11 dígitos
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Telefone</label>
+          <input type="text" formControlName="telefone" placeholder="11987654321" maxlength="11"
+            (input)="formatTelefone($event)"
+            [class.invalid]="cadastroForm.get('telefone')?.invalid && cadastroForm.get('telefone')?.touched">
+          <span class="error" *ngIf="cadastroForm.get('telefone')?.invalid && cadastroForm.get('telefone')?.touched">
+            Telefone inválido (10 ou 11 dígitos)
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="seu@email.com"
+          [class.invalid]="cadastroForm.get('email')?.invalid && cadastroForm.get('email')?.touched">
+        <span class="error" *ngIf="cadastroForm.get('email')?.invalid && cadastroForm.get('email')?.touched">
+          Email inválido
+        </span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" formControlName="senha" placeholder="Mínimo 6 caracteres"
+            [class.invalid]="cadastroForm.get('senha')?.invalid && cadastroForm.get('senha')?.touched">
+          <span class="error" *ngIf="cadastroForm.get('senha')?.invalid && cadastroForm.get('senha')?.touched">
+            Senha deve ter no mínimo 6 caracteres
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Confirmar Senha</label>
+          <input type="password" formControlName="confirmarSenha" placeholder="Repita a senha"
+            [class.invalid]="cadastroForm.get('confirmarSenha')?.invalid && cadastroForm.get('confirmarSenha')?.touched">
+          <span class="error"
+            *ngIf="cadastroForm.errors?.['senhasDiferentes'] && cadastroForm.get('confirmarSenha')?.touched">
+            Senhas não coincidem
+          </span>
+        </div>
+      </div>
+
+      <!-- Toggle Endereço -->
+      <button type="button" class="endereco-toggle-btn" (click)="toggleEndereco()" [class.active]="showEndereco">
+        <span class="toggle-icon">{{ showEndereco ? '-' : '+' }}</span>
+        <span class="toggle-text">Cadastrar endereço</span>
+        <span class="toggle-icon">{{ showEndereco ? '-' : '+' }}</span>
+      </button>
+
+
+      <!-- Endereço (Condicional) -->
+      <div *ngIf="showEndereco" class="endereco-section" formGroupName="endereco">
+        <div class="section-title">Endereço</div>
+
+        <div class="form-row">
+          <div class="form-group form-group-small">
+            <label>CEP</label>
+            <input type="text" formControlName="cep" placeholder="00000000" maxlength="8" (input)="formatCEP($event)"
+              [class.invalid]="cadastroForm.get('endereco.cep')?.invalid && cadastroForm.get('endereco.cep')?.touched">
+            <span class="error"
+              *ngIf="cadastroForm.get('endereco.cep')?.invalid && cadastroForm.get('endereco.cep')?.touched">
+              CEP deve ter 8 dígitos
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label>Logradouro</label>
+            <input type="text" formControlName="logradouro" placeholder="Rua, Avenida..."
+              [class.invalid]="cadastroForm.get('endereco.logradouro')?.invalid && cadastroForm.get('endereco.logradouro')?.touched">
+            <span class="error"
+              *ngIf="cadastroForm.get('endereco.logradouro')?.invalid && cadastroForm.get('endereco.logradouro')?.touched">
+              Logradouro é obrigatório
+            </span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group form-group-small">
+            <label>Número</label>
+            <input type="text" formControlName="numero" placeholder="123"
+              [class.invalid]="cadastroForm.get('endereco.numero')?.invalid && cadastroForm.get('endereco.numero')?.touched">
+            <span class="error"
+              *ngIf="cadastroForm.get('endereco.numero')?.invalid && cadastroForm.get('endereco.numero')?.touched">
+              Número é obrigatório
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label>Complemento</label>
+            <input type="text" formControlName="complemento" placeholder="Apto, Sala... (opcional)">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Bairro</label>
+          <input type="text" formControlName="bairro" placeholder="Bairro"
+            [class.invalid]="cadastroForm.get('endereco.bairro')?.invalid && cadastroForm.get('endereco.bairro')?.touched">
+          <span class="error"
+            *ngIf="cadastroForm.get('endereco.bairro')?.invalid && cadastroForm.get('endereco.bairro')?.touched">
+            Bairro é obrigatório
+          </span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Cidade</label>
+            <input type="text" formControlName="cidade" placeholder="Cidade"
+              [class.invalid]="cadastroForm.get('endereco.cidade')?.invalid && cadastroForm.get('endereco.cidade')?.touched">
+            <span class="error"
+              *ngIf="cadastroForm.get('endereco.cidade')?.invalid && cadastroForm.get('endereco.cidade')?.touched">
+              Cidade é obrigatória
+            </span>
+          </div>
+
+          <div class="form-group form-group-small">
+            <label>Estado</label>
+            <input type="text" formControlName="estado" placeholder="SP" maxlength="2"
+              style="text-transform: uppercase;"
+              [class.invalid]="cadastroForm.get('endereco.estado')?.invalid && cadastroForm.get('endereco.estado')?.touched">
+            <span class="error"
+              *ngIf="cadastroForm.get('endereco.estado')?.invalid && cadastroForm.get('endereco.estado')?.touched">
+              Estado deve ter 2 letras (ex: SP)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        {{ loading ? 'Cadastrando...' : 'Criar Conta' }}
+      </button>
+
+      <div class="footer-links">
+        <span>Já tem uma conta?</span>
+        <a (click)="goToLogin()" class="login-link">Faça login</a>
+      </div>
+    </form>
+  </div>
+</div>
