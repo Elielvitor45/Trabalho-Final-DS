@@ -49,6 +49,10 @@ public class UsuarioController {
         
         Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        if (usuario == null) {
+            throw new RuntimeException("Usuário não encontrado");
+        }
         
         // Atualizar apenas campos permitidos
         if (usuarioAtualizado.getNome() != null) {
