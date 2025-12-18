@@ -3,11 +3,13 @@ FROM maven:3.9-amazoncorretto-21 AS build
 WORKDIR /app
 
 # Copiar pom.xml e baixar dependências (cache layer)
-COPY pom.xml .
+# Copia o pom.xml e o código-fonte da pasta backend
+COPY backend/pom.xml .
+COPY backend/src ./src
+
 RUN mvn dependency:go-offline -B
 
-# Copiar código fonte e compilar
-COPY src ./backend/src
+
 RUN mvn clean package -DskipTests
 
 # Stage 2: Runtime
