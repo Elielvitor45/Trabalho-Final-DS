@@ -2,10 +2,11 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CategoriaVeiculo, VeiculoDTO } from '../../dto/veiculo.dto';
 import { Auth } from '../../services/auth';
 import { VeiculoService } from '../../services/veiculo';
+
+type ModoVisualizacao = 'grid' | 'lista' | 'tabela';
 
 @Component({
   selector: 'app-pesquisa-veiculos',
@@ -26,8 +27,9 @@ export class PesquisaVeiculosComponent implements OnInit {
   categorias: CategoriaVeiculo[] = ['Econômico', 'Intermediário', 'SUV', 'Luxo', 'Esportivo'];
   categoriaSelecionada: string = 'Todos';
   termoPesquisa: string = '';
-
-  private destroyRef = takeUntilDestroyed();
+  
+  // Modo de visualização
+  modoVisualizacao: ModoVisualizacao = 'grid';
 
   constructor(
     private veiculoService: VeiculoService,
@@ -38,16 +40,13 @@ export class PesquisaVeiculosComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Verifica autenticação
     this.authService.currentUser$.subscribe(user => {
       this.isAuthenticated = !!user;
       this.userName = user?.nome || null;
     });
 
-    // Carrega veículos disponíveis
     this.loadVeiculos();
 
-    // Verifica se há filtro de categoria via queryParams
     this.route.queryParams.subscribe(params => {
       if (params['categoria']) {
         this.categoriaSelecionada = params['categoria'];
@@ -60,9 +59,6 @@ export class PesquisaVeiculosComponent implements OnInit {
     return this.userName ? this.userName.split(' ')[0] : '';
   }
 
-  /**
-   * Carrega todos os veículos disponíveis
-   */
   loadVeiculos(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -84,34 +80,23 @@ export class PesquisaVeiculosComponent implements OnInit {
     });
   }
 
-  /**
-   * Filtra veículos por categoria
-   */
   filtrarPorCategoria(categoria: string): void {
     this.categoriaSelecionada = categoria;
     this.aplicarFiltros();
     this.atualizarURL();
   }
 
-  /**
-   * Busca veículos por termo de pesquisa
-   */
   pesquisar(): void {
     this.aplicarFiltros();
   }
 
-  /**
-   * Aplica todos os filtros (categoria + pesquisa)
-   */
   private aplicarFiltros(): void {
     let resultado = [...this.veiculos];
 
-    // Filtro por categoria
     if (this.categoriaSelecionada !== 'Todos') {
       resultado = resultado.filter(v => v.categoria === this.categoriaSelecionada);
     }
 
-    // Filtro por termo de pesquisa
     if (this.termoPesquisa.trim()) {
       const termo = this.termoPesquisa.toLowerCase();
       resultado = resultado.filter(v =>
@@ -124,19 +109,14 @@ export class PesquisaVeiculosComponent implements OnInit {
     this.veiculosFiltrados = resultado;
   }
 
-  /**
-   * Atualiza a URL com os filtros ativos
-   */
   private atualizarURL(): void {
     if (this.categoriaSelecionada === 'Todos') {
-      // Remove query params quando seleciona "Todos"
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: {},
         replaceUrl: true
       });
     } else {
-      // Adiciona query param da categoria sem adicionar ao histórico
       this.router.navigate([], {
         relativeTo: this.route,
         queryParams: { categoria: this.categoriaSelecionada },
@@ -145,15 +125,11 @@ export class PesquisaVeiculosComponent implements OnInit {
     }
   }
 
-  /**
-   * Limpa todos os filtros
-   */
   limparFiltros(): void {
     this.categoriaSelecionada = 'Todos';
     this.termoPesquisa = '';
     this.veiculosFiltrados = [...this.veiculos];
     
-    // Remove query params da URL
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {},
@@ -162,8 +138,27 @@ export class PesquisaVeiculosComponent implements OnInit {
   }
 
   /**
-   * Formata valor para moeda brasileira
+   * Muda o modo de visualização
    */
+  mudarVisualizacao(modo: ModoVisualizacao): void {
+    this.modoVisualizacao = modo;
+  }
+
+  /**
+   * Retorna a imagem do veículo (placeholder por enquanto)
+   */
+getImagemVeiculo(veiculo: VeiculoDTO): string {
+  const imagensPorCategoria: { [key: string]: string } = {
+    'Econômico': 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop&auto=format',
+    'Intermediário': 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=400&h=300&fit=crop&auto=format',
+    'SUV': 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&h=300&fit=crop&auto=format',
+    'Luxo': 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop&auto=format',
+    'Esportivo': 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=300&fit=crop&auto=format'
+  };
+  
+  return imagensPorCategoria[veiculo.categoria] || imagensPorCategoria['Econômico'];
+}
+
   formatarValor(valor: number): string {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -171,9 +166,6 @@ export class PesquisaVeiculosComponent implements OnInit {
     }).format(valor);
   }
 
-  /**
-   * Retorna ícone baseado na categoria
-   */
   getIconeCategoria(categoria: string): string {
     const icones: { [key: string]: string } = {
       'Econômico': '🚗',
@@ -185,33 +177,21 @@ export class PesquisaVeiculosComponent implements OnInit {
     return icones[categoria] || '🚗';
   }
 
-  /**
-   * Ação ao clicar em "Alugar"
-   * Se não autenticado, redireciona para login
-   * Se autenticado, vai para o perfil do carro
-   */
-alugarVeiculo(veiculoId: number): void {
-  if (!this.isAuthenticated) {
-    // Salva ID do veículo para redirecionar após login
-    localStorage.setItem('veiculoIntencao', veiculoId.toString());
-    this.router.navigate(['/login']);
-  } else {
-    // ADICIONE O queryParams AQUI
-    this.router.navigate(['/veiculo', veiculoId], { 
-      queryParams: { alugar: 'true' } 
-    });
+  alugarVeiculo(veiculoId: number): void {
+    if (!this.isAuthenticated) {
+      localStorage.setItem('veiculoIntencao', veiculoId.toString());
+      this.router.navigate(['/login']);
+    } else {
+      this.router.navigate(['/veiculo', veiculoId], { 
+        queryParams: { alugar: 'true' } 
+      });
+    }
   }
-}
 
-
-  /**
-   * Navega para detalhes do veículo
-   */
   verDetalhes(veiculoId: number): void {
     this.router.navigate(['/veiculo', veiculoId]);
   }
 
-  // Navegação
   goToHome(): void {
     this.router.navigate(['/home']);
   }

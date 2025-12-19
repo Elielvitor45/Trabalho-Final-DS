@@ -133,6 +133,20 @@ export class VeiculoDetalhesComponent implements OnInit, OnDestroy {
     this.diasLocacao = Math.ceil((devolucao.getTime() - retirada.getTime()) / (1000 * 60 * 60 * 24));
     this.valorTotal = this.diasLocacao * this.veiculo.valorDiaria;
   }
+  /**
+ * Retorna a imagem do veículo
+ */
+getImagemVeiculo(veiculo: VeiculoDTO): string {
+  const imagensPorCategoria: { [key: string]: string } = {
+    'Econômico': 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop&auto=format',
+    'Intermediário': 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=400&h=300&fit=crop&auto=format',
+    'SUV': 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&h=300&fit=crop&auto=format',
+    'Luxo': 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop&auto=format',
+    'Esportivo': 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=300&fit=crop&auto=format'
+  };
+  
+  return imagensPorCategoria[veiculo.categoria] || imagensPorCategoria['Econômico'];
+}
 
   /**
    * Valida formulário

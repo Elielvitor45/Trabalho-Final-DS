@@ -14,14 +14,16 @@
         <a (click)="scrollToContact()">Contato</a>
         
         <div *ngIf="isAuthenticated" class="nav-user">
-          <span class="user-name-link" (click)="goToPerfil()">
-            Olá, {{ firstName }}
-          </span>
-          <button class="btn-secondary" (click)="logout()">Sair</button>
+          <button class="btn-user-name" (click)="goToPerfil()">
+            👤 Olá, {{ firstName }}
+          </button>
+          <button class="btn-nav-danger" (click)="logout()">
+            🚪 Sair
+          </button>
         </div>
         
         <button *ngIf="!isAuthenticated" class="btn-primary" (click)="goToLogin()">
-          Entrar
+          👤 Entrar
         </button>
       </div>
     </div>
@@ -36,7 +38,7 @@
         Preços acessíveis, atendimento de excelência.
       </p>
       <button class="btn-hero-primary" (click)="goToVeiculos()">
-        Ver Todos os Veículos →
+        🚗 Ver Todos os Veículos
       </button>
     </div>
   </section>

@@ -83,51 +83,66 @@ body {
   align-items: center;
 }
 
-.user-name-link {
-  color: #667eea;
-  font-weight: 700;
+/* ==================== BOTÕES ESTILO PERFIL ==================== */
+.btn-primary,
+.btn-nav-danger,
+.btn-user-name,
+.btn-outline,
+.btn-hero-primary,
+.btn-vehicle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-}
-
-.user-name-link:hover {
-  background: #f3f4f6;
+  font-size: 0.95rem;
+  border: none;
 }
 
 .btn-primary {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-size: 1rem;
 }
 
 .btn-primary:hover {
+  background: #5568d3;
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.btn-secondary {
-  padding: 0.75rem 1.5rem;
-  background: white;
+.btn-nav-danger {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.btn-nav-danger:hover {
+  background: #fecaca;
+  transform: translateY(-2px);
+}
+
+.btn-user-name {
+  background: #f3f4f6;
   color: #667eea;
-  border: 2px solid #667eea;
-  border-radius: 8px;
   font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
+}
+
+.btn-user-name:hover {
+  background: #e5e7eb;
+}
+
+.btn-outline {
+  background: #f3f4f6;
+  color: #374151;
   font-size: 1rem;
 }
 
-.btn-secondary:hover {
-  background: #667eea;
-  color: white;
+.btn-outline:hover {
+  background: #e5e7eb;
+  transform: translateY(-2px);
 }
 
 /* ==================== HERO SECTION ==================== */
@@ -162,12 +177,8 @@ body {
   padding: 1rem 2.5rem;
   background: white;
   color: #667eea;
-  border: none;
-  border-radius: 12px;
   font-size: 1.125rem;
   font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
 }
 
 .btn-hero-primary:hover {
@@ -216,24 +227,6 @@ body {
   color: #6b7280;
   font-size: 1.125rem;
   margin-top: 0.5rem;
-}
-
-.btn-outline {
-  padding: 0.75rem 1.5rem;
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-size: 1rem;
-}
-
-.btn-outline:hover {
-  background: #667eea;
-  color: white;
-  transform: translateY(-2px);
 }
 
 /* ==================== SERVICES ==================== */
@@ -393,17 +386,13 @@ body {
 .btn-vehicle {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #667eea;
   color: white;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
   font-size: 1rem;
 }
 
 .btn-vehicle:hover {
+  background: #5568d3;
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
 }
@@ -656,7 +645,8 @@ body {
   }
 
   .btn-primary,
-  .btn-secondary {
+  .btn-nav-danger,
+  .btn-user-name {
     padding: 0.625rem 1.25rem;
     font-size: 0.9rem;
   }

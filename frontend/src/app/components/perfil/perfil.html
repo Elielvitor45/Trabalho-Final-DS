@@ -16,8 +16,12 @@
           <span class="logo-text">LocadoraMax</span>
         </div>
         <div class="navbar-actions">
-          <button class="btn-nav" (click)="goToHome()">🏠 Home</button>
-          <button class="btn-nav-danger" (click)="logout()">🚪 Sair</button>
+          <button class="btn-nav" (click)="goToHome()">
+            🏠 Home
+          </button>
+          <button class="btn-nav-danger" (click)="logout()">
+            🚪 Sair
+          </button>
         </div>
       </div>
     </nav>
@@ -173,9 +177,11 @@
             </div>
 
             <div class="form-actions-inline">
-              <button type="button" class="btn-outline" (click)="cancelarEdicaoEndereco()">Cancelar</button>
+              <button type="button" class="btn-outline" (click)="cancelarEdicaoEndereco()">
+                Cancelar
+              </button>
               <button type="submit" class="btn-primary-custom" [disabled]="enderecoForm.invalid || salvandoEndereco">
-                {{ salvandoEndereco ? 'Salvando...' : 'Salvar' }}
+                {{ salvandoEndereco ? 'Salvando...' : '💾 Salvar' }}
               </button>
             </div>
           </form>
@@ -239,6 +245,8 @@
     <div class="error-icon">⚠️</div>
     <h2>Erro ao carregar perfil</h2>
     <p>{{ errorMessage }}</p>
-    <button class="btn-primary-custom" (click)="goToHome()">Voltar para Home</button>
+    <button class="btn-primary-custom" (click)="goToHome()">
+      🏠 Voltar para Home
+    </button>
   </div>
 </div>

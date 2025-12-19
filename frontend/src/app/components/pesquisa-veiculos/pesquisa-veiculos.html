@@ -3,21 +3,24 @@
   <nav class="navbar">
     <div class="nav-content">
       <div class="logo" (click)="goToHome()">
-        <h1>🚗 LocadoraMax</h1>
+        <span class="logo-icon">🚗</span>
+        <span class="logo-text">LocadoraMax</span>
       </div>
 
       <div class="nav-links">
-        <a (click)="goToHome()" style="cursor: pointer;">Home</a>
+        <a (click)="goToHome()">Home</a>
         
-        <div *ngIf="isAuthenticated">
-          <span class="user-name-link" (click)="goToPerfil()">
-            Olá, {{ firstName }}
-          </span>
-          <button class="btn-secondary" (click)="logout()">Sair</button>
+        <div *ngIf="isAuthenticated" class="nav-user">
+          <button class="btn-user-name" (click)="goToPerfil()">
+            👤 Olá, {{ firstName }}
+          </button>
+          <button class="btn-nav-danger" (click)="logout()">
+            🚪 Sair
+          </button>
         </div>
         
         <button *ngIf="!isAuthenticated" class="btn-primary" (click)="goToLogin()">
-          Entrar
+          👤 Entrar
         </button>
       </div>
     </div>
@@ -73,12 +76,38 @@
         </button>
       </div>
 
-      <!-- Resultados Info -->
-      <div class="results-info">
-        <p *ngIf="!loading">
-          <strong>{{ veiculosFiltrados.length }}</strong> 
-          {{ veiculosFiltrados.length === 1 ? 'veículo encontrado' : 'veículos encontrados' }}
-        </p>
+      <!-- Controles de Visualização e Resultados -->
+      <div class="view-controls">
+        <div class="results-info">
+          <p *ngIf="!loading">
+            <strong>{{ veiculosFiltrados.length }}</strong> 
+            {{ veiculosFiltrados.length === 1 ? 'veículo encontrado' : 'veículos encontrados' }}
+          </p>
+        </div>
+
+        <div class="view-toggle">
+          <button 
+            class="view-btn"
+            [class.active]="modoVisualizacao === 'grid'"
+            (click)="mudarVisualizacao('grid')"
+            title="Visualização em Grade">
+            ▦ Grade
+          </button>
+          <button 
+            class="view-btn"
+            [class.active]="modoVisualizacao === 'lista'"
+            (click)="mudarVisualizacao('lista')"
+            title="Visualização em Lista">
+            ☰ Lista
+          </button>
+          <button 
+            class="view-btn"
+            [class.active]="modoVisualizacao === 'tabela'"
+            (click)="mudarVisualizacao('tabela')"
+            title="Visualização em Tabela">
+            ▤ Tabela
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -92,10 +121,10 @@
   <!-- Error Message -->
   <div *ngIf="errorMessage && !loading" class="error-container">
     <div class="error-message">{{ errorMessage }}</div>
-    <button class="btn-primary" (click)="loadVeiculos()">Tentar Novamente</button>
+    <button class="btn-primary" (click)="loadVeiculos()">🔄 Tentar Novamente</button>
   </div>
 
-  <!-- Vehicles Grid -->
+  <!-- Vehicles Section -->
   <section class="vehicles-section" *ngIf="!loading && !errorMessage">
     <div class="container">
       <!-- Nenhum resultado -->
@@ -106,48 +135,135 @@
         <button class="btn-primary" (click)="limparFiltros()">Ver Todos os Veículos</button>
       </div>
 
-      <!-- Grid de Veículos -->
-      <div *ngIf="veiculosFiltrados.length > 0" class="vehicles-grid">
+      <!-- VISUALIZAÇÃO EM GRADE (GRID) -->
+      <div *ngIf="veiculosFiltrados.length > 0 && modoVisualizacao === 'grid'" class="vehicles-grid">
         <div *ngFor="let veiculo of veiculosFiltrados" class="vehicle-card">
-          <!-- Badge de categoria -->
           <div class="badge-categoria">{{ veiculo.categoria }}</div>
           
-          <!-- Ícone do veículo -->
-          <div class="vehicle-image">
-            {{ getIconeCategoria(veiculo.categoria) }}
+          <div class="vehicle-image-wrapper">
+            <img 
+              [src]="getImagemVeiculo(veiculo)" 
+              [alt]="veiculo.marca + ' ' + veiculo.modelo"
+              class="vehicle-image-real"
+            >
           </div>
           
-          <!-- Informações -->
           <h3 class="vehicle-title">{{ veiculo.marca }} {{ veiculo.modelo }}</h3>
-          <p class="vehicle-year">Ano: {{ veiculo.ano }}</p>
+          <p class="vehicle-year">{{ veiculo.ano }}</p>
           
-          <!-- Descrição -->
-          <p class="vehicle-description" *ngIf="veiculo.descricao">
-            {{ veiculo.descricao }}
-          </p>
-          
-          <!-- Preço -->
           <div class="vehicle-price">
             {{ formatarValor(veiculo.valorDiaria) }}<span class="price-period">/dia</span>
           </div>
           
-          <!-- Informações Adicionais -->
           <ul class="vehicle-features">
-            <li>✓ Placa: {{ veiculo.placa }}</li>
-            <li>✓ {{ veiculo.categoria }}</li>
-            <li *ngIf="veiculo.disponivel">✓ Disponível agora</li>
+            <li><span class="feature-icon">✓</span> Placa: {{ veiculo.placa }}</li>
+            <li><span class="feature-icon">✓</span> {{ veiculo.categoria }}</li>
+            <li *ngIf="veiculo.disponivel"><span class="feature-icon">✓</span> Disponível</li>
           </ul>
           
-          <!-- Botões de ação -->
           <div class="vehicle-actions">
             <button class="btn-details" (click)="verDetalhes(veiculo.id)">
-              Ver Detalhes
+              👁️ Detalhes
             </button>
             <button class="btn-rent" (click)="alugarVeiculo(veiculo.id)">
-              {{ isAuthenticated ? 'Alugar Agora' : 'Fazer Login' }}
+              {{ isAuthenticated ? '🚗 Alugar' : '🔒 Login' }}
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- VISUALIZAÇÃO EM LISTA -->
+      <div *ngIf="veiculosFiltrados.length > 0 && modoVisualizacao === 'lista'" class="vehicles-list">
+        <div *ngFor="let veiculo of veiculosFiltrados" class="vehicle-list-item">
+          <div class="list-item-image">
+            <img 
+              [src]="getImagemVeiculo(veiculo)" 
+              [alt]="veiculo.marca + ' ' + veiculo.modelo"
+            >
+            <div class="list-badge">{{ veiculo.categoria }}</div>
+          </div>
+          
+          <div class="list-item-content">
+            <div class="list-item-header">
+              <h3 class="list-item-title">{{ veiculo.marca }} {{ veiculo.modelo }}</h3>
+              <div class="list-item-price">
+                {{ formatarValor(veiculo.valorDiaria) }}<span>/dia</span>
+              </div>
+            </div>
+            
+            <p class="list-item-subtitle">Ano: {{ veiculo.ano }} • Placa: {{ veiculo.placa }}</p>
+            
+            <p class="list-item-description" *ngIf="veiculo.descricao">
+              {{ veiculo.descricao }}
+            </p>
+            
+            <div class="list-item-features">
+              <span class="list-feature">✓ {{ veiculo.categoria }}</span>
+              <span class="list-feature" *ngIf="veiculo.disponivel">✓ Disponível agora</span>
+            </div>
+          </div>
+          
+          <div class="list-item-actions">
+            <button class="btn-list-details" (click)="verDetalhes(veiculo.id)">
+              👁️ Ver Detalhes
+            </button>
+            <button class="btn-list-rent" (click)="alugarVeiculo(veiculo.id)">
+              {{ isAuthenticated ? '🚗 Alugar Agora' : '🔒 Fazer Login' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISUALIZAÇÃO EM TABELA -->
+      <div *ngIf="veiculosFiltrados.length > 0 && modoVisualizacao === 'tabela'" class="vehicles-table-wrapper">
+        <table class="vehicles-table">
+          <thead>
+            <tr>
+              <th>Imagem</th>
+              <th>Veículo</th>
+              <th>Ano</th>
+              <th>Categoria</th>
+              <th>Placa</th>
+              <th>Valor/Dia</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let veiculo of veiculosFiltrados">
+              <td>
+                <img 
+                  [src]="getImagemVeiculo(veiculo)" 
+                  [alt]="veiculo.marca + ' ' + veiculo.modelo"
+                  class="table-vehicle-image"
+                >
+              </td>
+              <td class="table-vehicle-name">
+                <strong>{{ veiculo.marca }}</strong><br>
+                {{ veiculo.modelo }}
+              </td>
+              <td>{{ veiculo.ano }}</td>
+              <td>
+                <span class="table-badge">{{ veiculo.categoria }}</span>
+              </td>
+              <td>{{ veiculo.placa }}</td>
+              <td class="table-price">{{ formatarValor(veiculo.valorDiaria) }}</td>
+              <td>
+                <span class="status-badge" [class.disponivel]="veiculo.disponivel">
+                  {{ veiculo.disponivel ? '✓ Disponível' : '✗ Indisponível' }}
+                </span>
+              </td>
+              <td class="table-actions">
+                <button class="btn-table-action btn-table-details" (click)="verDetalhes(veiculo.id)">
+                  👁️
+                </button>
+                <button class="btn-table-action btn-table-rent" (click)="alugarVeiculo(veiculo.id)">
+                  {{ isAuthenticated ? '🚗' : '🔒' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>
