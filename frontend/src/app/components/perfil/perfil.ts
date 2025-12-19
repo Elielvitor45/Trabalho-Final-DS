@@ -5,7 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { UsuarioPerfil } from '../../models/user.model';
 import { EstatisticasDTO } from '../../dto/auth.dto';
-import { LocacaoDTO, StatusLocacao } from '../../services/locacao';  // ✅ IMPORT CORRETO
+import { LocacaoDTO, StatusLocacao } from '../../services/locacao';
 
 @Component({
   selector: 'app-perfil',
@@ -23,7 +23,6 @@ export class Perfil implements OnInit {
   salvandoEndereco = false;
   enderecoForm!: FormGroup;
 
-  // Locações e Estatísticas - USANDO O DTO CORRETO
   locacoes: LocacaoDTO[] = [];
   estatisticas: EstatisticasDTO | null = null;
   loadingLocacoes = false;
@@ -89,6 +88,7 @@ export class Perfil implements OnInit {
     
     this.authService.getEstatisticas().subscribe({
       next: (data) => {
+        console.log('📊 Estatísticas recebidas do backend:', data);
         this.estatisticas = data;
         this.loadingEstatisticas = false;
         this.cdr.detectChanges();
@@ -110,10 +110,17 @@ export class Perfil implements OnInit {
     this.loadingLocacoes = true;
     this.mostrarHistorico = true;
     
-    // ✅ CASTING para o tipo correto
     this.authService.getHistoricoLocacoes().subscribe({
       next: (data: any) => {
         this.locacoes = data as LocacaoDTO[];
+        console.log('📜 Locações carregadas:', this.locacoes);
+        
+        // ✅ Se backend retornar valorTotalGasto = 0 mas existem locações, recalcula
+        if (this.estatisticas && this.estatisticas.valorTotalGasto === 0 && this.locacoes.length > 0) {
+          console.warn('⚠️ Backend retornou valorTotalGasto = 0, recalculando...');
+          this.calcularEstatisticasManualmente();
+        }
+        
         this.loadingLocacoes = false;
         this.cdr.detectChanges();
       },
@@ -126,6 +133,50 @@ export class Perfil implements OnInit {
     });
   }
 
+  /**
+   * ✅ Calcula estatísticas manualmente quando backend falha
+   */
+  private calcularEstatisticasManualmente(): void {
+    if (!this.locacoes || this.locacoes.length === 0) {
+      console.warn('⚠️ Nenhuma locação para calcular');
+      return;
+    }
+    
+    let totalGasto = 0;
+    let ativas = 0;
+    let finalizadas = 0;
+    
+    this.locacoes.forEach(locacao => {
+      console.log(`Locação ID ${locacao.id}: R$ ${locacao.valorTotal} - Status: ${locacao.status}`);
+      
+      // Soma o valor total
+      if (locacao.valorTotal) {
+        totalGasto += locacao.valorTotal;
+      }
+      
+      // Conta status (apenas os válidos do enum)
+      if (locacao.status === 'ATIVA') {
+        ativas++;
+      } else if (locacao.status === 'FINALIZADA') {
+        finalizadas++;
+      }
+    });
+    
+    // ✅ Atualiza estatísticas com TODOS os campos obrigatórios
+    this.estatisticas = {
+      totalLocacoes: this.locacoes.length,
+      locacoesAtivas: ativas,
+      locacoesFinalizadas: finalizadas,
+      valorTotalGasto: totalGasto
+    };
+    
+    console.log('✅ Estatísticas recalculadas manualmente:', this.estatisticas);
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * ✅ Retorna classe CSS baseada no status (apenas status válidos)
+   */
   getStatusClass(status: StatusLocacao): string {
     switch(status) {
       case 'ATIVA':
@@ -146,7 +197,7 @@ export class Perfil implements OnInit {
   }
 
   formatarValor(valor: number): string {
-    if (!valor) return 'R$ 0,00';
+    if (valor === null || valor === undefined) return 'R$ 0,00';
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'

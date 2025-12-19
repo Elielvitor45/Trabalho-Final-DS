@@ -155,32 +155,40 @@ public class UsuarioController {
      * Obter estatísticas do usuário
      */
     @GetMapping("/estatisticas")
-    public ResponseEntity<EstatisticasUsuario> getEstatisticas() {
-        String email = getEmailUsuarioAutenticado();
-        
-        Usuario usuario = usuarioRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        
-        List<LocacaoDTO> locacoes = locacaoService.listarPorUsuario(usuario.getId());
-        
-        long totalLocacoes = locacoes.size();
-        long locacoesAtivas = locacoes.stream().filter(l -> l.getStatus().name().equals("ATIVA")).count();
-        long locacoesFinalizadas = locacoes.stream().filter(l -> l.getStatus().name().equals("FINALIZADA")).count();
-        
-        double valorTotalGasto = locacoes.stream()
-            .filter(l -> l.getStatus().name().equals("FINALIZADA"))
-            .mapToDouble(l -> l.getValorTotal().doubleValue())
-            .sum();
-        
-        EstatisticasUsuario stats = new EstatisticasUsuario(
-            totalLocacoes,
-            locacoesAtivas,
-            locacoesFinalizadas,
-            valorTotalGasto
-        );
-        
-        return ResponseEntity.ok(stats);
-    }
+public ResponseEntity<EstatisticasUsuario> getEstatisticas() {
+    String email = getEmailUsuarioAutenticado();
+    
+    Usuario usuario = usuarioRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    
+    List<LocacaoDTO> locacoes = locacaoService.listarPorUsuario(usuario.getId());
+    
+    long totalLocacoes = locacoes.size();
+    
+    long locacoesAtivas = locacoes.stream()
+        .filter(l -> "ATIVA".equals(l.getStatus().name()))
+        .count();
+    
+    long locacoesFinalizadas = locacoes.stream()
+        .filter(l -> "FINALIZADA".equals(l.getStatus().name()))
+        .count();
+    
+    // ✅ SOMA TODAS AS LOCAÇÕES (exceto canceladas, se quiser)
+    double valorTotalGasto = locacoes.stream()
+        .filter(l -> !"CANCELADA".equals(l.getStatus().name()))  // Opcional: exclui canceladas
+        .filter(l -> l.getValorTotal() != null)
+        .mapToDouble(l -> l.getValorTotal().doubleValue())
+        .sum();
+    
+    EstatisticasUsuario stats = new EstatisticasUsuario(
+        totalLocacoes,
+        locacoesAtivas,
+        locacoesFinalizadas,
+        valorTotalGasto
+    );
+    
+    return ResponseEntity.ok(stats);
+}
 
     /**
      * Desativar conta do usuário
