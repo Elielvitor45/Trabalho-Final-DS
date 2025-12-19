@@ -11,13 +11,16 @@ public class AuthResponse {
     private Long id;
     private String nome;
     private String email;
-    private Long expiresIn; // milissegundos
+    private Boolean isFuncionario;
+    private Long expiresIn;
 
-    public AuthResponse(String token, Long id, String nome, String email, Long expiresIn) {
+    public AuthResponse(String token, Long id, String nome, String email, 
+                       Boolean isFuncionario, Long expiresIn) {
         this.token = token;
         this.id = id;
         this.nome = nome;
         this.email = email;
+        this.isFuncionario = isFuncionario;
         this.expiresIn = expiresIn;
     }
 }

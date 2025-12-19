@@ -58,14 +58,15 @@ public class AuthService {
         usuario.setTelefone(request.getTelefone());
         usuario.setEndereco(endereco);
         usuario.setAtivo(true);
+        usuario.setIsFuncionario(false);
 
         usuario = usuarioRepository.save(usuario);
 
-        // Gerar token
-        String token = jwtService.generateToken(usuario.getEmail(), usuario.getId());
+        // Gerar token com a informação de funcionário
+        String token = jwtService.generateToken(usuario.getEmail(), usuario.getId(), usuario.getIsFuncionario());
 
         return new AuthResponse(token, usuario.getId(), usuario.getNome(), 
-                              usuario.getEmail(), jwtExpiration);
+                              usuario.getEmail(), usuario.getIsFuncionario(), jwtExpiration);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -83,10 +84,10 @@ public class AuthService {
             throw new RuntimeException("Usuário inativo");
         }
 
-        // Gerar token
-        String token = jwtService.generateToken(usuario.getEmail(), usuario.getId());
+        // Gerar token com a informação de funcionário
+        String token = jwtService.generateToken(usuario.getEmail(), usuario.getId(), usuario.getIsFuncionario());
 
         return new AuthResponse(token, usuario.getId(), usuario.getNome(), 
-                              usuario.getEmail(), jwtExpiration);
+                              usuario.getEmail(), usuario.getIsFuncionario(), jwtExpiration);
     }
 }

@@ -10,6 +10,7 @@ import locadora.backend.service.LocacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -27,35 +28,46 @@ public class LocacaoController {
     private final UsuarioRepository usuarioRepository;
 
     /**
-     * Listar todas as locações (pode ser usado por admin no futuro)
+     * GET /api/locacoes
+     * Listar todas as locações
+     * - Funcionário: vê todas
+     * - Cliente: vê apenas as suas
      */
     @GetMapping
     public ResponseEntity<List<LocacaoDTO>> listarTodas() {
-        return ResponseEntity.ok(locacaoService.listarTodas());
+        String email = getEmailUsuarioAutenticado();
+        Usuario usuario = usuarioRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        
+        // Se for funcionário, lista todas. Se for cliente, lista apenas as suas
+        if (usuario.getIsFuncionario()) {
+            return ResponseEntity.ok(locacaoService.listarTodas());
+        } else {
+            return ResponseEntity.ok(locacaoService.listarPorUsuario(usuario.getId()));
+        }
     }
 
     /**
+     * GET /api/locacoes/minhas
      * Listar locações do usuário autenticado
      */
     @GetMapping("/minhas")
     public ResponseEntity<List<LocacaoDTO>> listarMinhasLocacoes() {
         String email = getEmailUsuarioAutenticado();
-        
         Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         
         List<LocacaoDTO> locacoes = locacaoService.listarPorUsuario(usuario.getId());
-        
         return ResponseEntity.ok(locacoes);
     }
 
     /**
+     * GET /api/locacoes/minhas/ativas
      * Listar locações ativas do usuário autenticado
      */
     @GetMapping("/minhas/ativas")
     public ResponseEntity<List<LocacaoDTO>> listarMinhasLocacoesAtivas() {
         String email = getEmailUsuarioAutenticado();
-        
         Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         
@@ -68,12 +80,12 @@ public class LocacaoController {
     }
 
     /**
+     * GET /api/locacoes/minhas/finalizadas
      * Listar locações finalizadas do usuário autenticado
      */
     @GetMapping("/minhas/finalizadas")
     public ResponseEntity<List<LocacaoDTO>> listarMinhasLocacoesFinalizadas() {
         String email = getEmailUsuarioAutenticado();
-        
         Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         
@@ -86,35 +98,29 @@ public class LocacaoController {
     }
 
     /**
-     * Listar locações por usuário específico
+     * GET /api/locacoes/usuario/{usuarioId}
+     * Listar locações por usuário específico (apenas funcionários)
      */
     @GetMapping("/usuario/{usuarioId}")
+    @PreAuthorize("hasRole('FUNCIONARIO')")
     public ResponseEntity<List<LocacaoDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
-        // Verificar se o usuário está tentando acessar suas próprias locações
-        String email = getEmailUsuarioAutenticado();
-        Usuario usuarioAutenticado = usuarioRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        
-        if (!usuarioAutenticado.getId().equals(usuarioId)) {
-            throw new RuntimeException("Acesso negado");
-        }
-        
         return ResponseEntity.ok(locacaoService.listarPorUsuario(usuarioId));
     }
 
     /**
+     * GET /api/locacoes/{id}
      * Buscar locação específica por ID
      */
     @GetMapping("/{id}")
     public ResponseEntity<LocacaoDTO> buscarPorId(@PathVariable Long id) {
         LocacaoDTO locacao = locacaoService.buscarPorId(id);
         
-        // Verificar se a locação pertence ao usuário autenticado
+        // Verificar se a locação pertence ao usuário autenticado (se não for funcionário)
         String email = getEmailUsuarioAutenticado();
         Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         
-        if (!locacao.getUsuario().getId().equals(usuario.getId())) {
+        if (!usuario.getIsFuncionario() && !locacao.getUsuario().getId().equals(usuario.getId())) {
             throw new RuntimeException("Acesso negado");
         }
         
@@ -122,50 +128,49 @@ public class LocacaoController {
     }
 
     /**
+     * POST /api/locacoes
      * Criar nova locação
      */
     @PostMapping
     public ResponseEntity<LocacaoDTO> criar(@Valid @RequestBody LocacaoCreateDTO dto) {
         String email = getEmailUsuarioAutenticado();
-        
         LocacaoDTO locacao = locacaoService.criar(dto, email);
-        
         return ResponseEntity.status(HttpStatus.CREATED).body(locacao);
     }
 
     /**
-     * Finalizar uma locação
+     * PATCH /api/locacoes/{id}/finalizar
+     * Finalizar uma locação (cliente finaliza a sua, funcionário pode finalizar qualquer uma)
      */
     @PatchMapping("/{id}/finalizar")
     public ResponseEntity<LocacaoDTO> finalizar(@PathVariable Long id) {
-        // Verificar se a locação pertence ao usuário
-        verificarPropriedadeLocacao(id);
+        // Verificar propriedade da locação (se não for funcionário)
+        verificarPropriedadeOuFuncionario(id);
         
         LocacaoDTO locacao = locacaoService.finalizar(id);
-        
         return ResponseEntity.ok(locacao);
     }
 
     /**
-     * Cancelar uma locação
+     * PATCH /api/locacoes/{id}/cancelar
+     * Cancelar uma locação (cliente cancela a sua, funcionário pode cancelar qualquer uma)
      */
     @PatchMapping("/{id}/cancelar")
     public ResponseEntity<LocacaoDTO> cancelar(@PathVariable Long id) {
-        // Verificar se a locação pertence ao usuário
-        verificarPropriedadeLocacao(id);
+        // Verificar propriedade da locação (se não for funcionário)
+        verificarPropriedadeOuFuncionario(id);
         
         LocacaoDTO locacao = locacaoService.cancelar(id);
-        
         return ResponseEntity.ok(locacao);
     }
 
     /**
+     * GET /api/locacoes/resumo
      * Obter resumo de locações por status
      */
     @GetMapping("/resumo")
     public ResponseEntity<ResumoLocacoes> obterResumo() {
         String email = getEmailUsuarioAutenticado();
-        
         Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         
@@ -192,6 +197,7 @@ public class LocacaoController {
     }
 
     /**
+     * GET /api/locacoes/verificar-disponibilidade/{veiculoId}
      * Verificar disponibilidade de veículo para período
      */
     @GetMapping("/verificar-disponibilidade/{veiculoId}")
@@ -202,7 +208,6 @@ public class LocacaoController {
         
         // Aqui você pode implementar lógica para verificar conflitos de datas
         // Por enquanto, retorna disponível se o veículo estiver marcado como disponível
-        
         DisponibilidadeResponse response = new DisponibilidadeResponse(
             true,
             "Veículo disponível para o período solicitado"
@@ -210,6 +215,8 @@ public class LocacaoController {
         
         return ResponseEntity.ok(response);
     }
+
+    // ========== MÉTODOS AUXILIARES ==========
 
     /**
      * Método auxiliar para obter email do usuário autenticado
@@ -223,19 +230,26 @@ public class LocacaoController {
     }
 
     /**
-     * Método auxiliar para verificar se locação pertence ao usuário
+     * Método auxiliar para verificar se locação pertence ao usuário OU se é funcionário
      */
-    private void verificarPropriedadeLocacao(Long locacaoId) {
+    private void verificarPropriedadeOuFuncionario(Long locacaoId) {
         String email = getEmailUsuarioAutenticado();
         Usuario usuario = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         
-        LocacaoDTO locacao = locacaoService.buscarPorId(locacaoId);
+        // Se for funcionário, pode modificar qualquer locação
+        if (usuario.getIsFuncionario()) {
+            return;
+        }
         
+        // Se for cliente, só pode modificar suas próprias locações
+        LocacaoDTO locacao = locacaoService.buscarPorId(locacaoId);
         if (!locacao.getUsuario().getId().equals(usuario.getId())) {
             throw new RuntimeException("Você não tem permissão para modificar esta locação");
         }
     }
+
+    // ========== CLASSES INTERNAS ==========
 
     /**
      * Classe interna para resumo de locações
@@ -247,8 +261,8 @@ public class LocacaoController {
         public long canceladas;
         public double valorTotalGasto;
 
-        public ResumoLocacoes(long total, long ativas, long finalizadas, 
-                             long canceladas, double valorTotalGasto) {
+        public ResumoLocacoes(long total, long ativas, long finalizadas,
+                            long canceladas, double valorTotalGasto) {
             this.total = total;
             this.ativas = ativas;
             this.finalizadas = finalizadas;

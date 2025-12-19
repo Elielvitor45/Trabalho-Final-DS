@@ -62,6 +62,9 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean ativo = true;
 
+    @Column(nullable = false)
+    private Boolean isFuncionario;
+
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;

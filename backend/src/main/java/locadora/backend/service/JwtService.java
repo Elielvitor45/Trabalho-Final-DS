@@ -26,9 +26,10 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String email, Long userId) {
+    public String generateToken(String email, Long userId, Boolean isFuncionario) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
+        claims.put("role", isFuncionario ? "ROLE_FUNCIONARIO" : "ROLE_CLIENTE");
         return createToken(claims, email);
     }
 
@@ -51,6 +52,10 @@ public class JwtService {
 
     public Long extractUserId(String token) {
         return extractAllClaims(token).get("userId", Long.class);
+    }
+
+    public String extractRole(String token) {
+        return extractAllClaims(token).get("role", String.class);
     }
 
     public boolean isTokenValid(String token) {
