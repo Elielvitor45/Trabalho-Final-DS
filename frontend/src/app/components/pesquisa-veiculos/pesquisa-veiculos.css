@@ -29,10 +29,10 @@
   align-items: center;
 }
 
+/* Logo */
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   cursor: pointer;
   transition: transform 0.3s;
 }
@@ -41,19 +41,18 @@
   transform: scale(1.05);
 }
 
-.logo-icon {
-  font-size: 1.8rem;
+.logo-image {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  transition: filter 0.3s ease;
 }
 
-.logo-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.logo-image:hover {
+  filter: brightness(1.1);
 }
 
+/* Nav Links */
 .nav-links {
   display: flex;
   gap: 2rem;
@@ -78,13 +77,16 @@
   align-items: center;
 }
 
-/* ==================== BOTÕES ESTILO PERFIL ==================== */
+/* ==================== BOTÕES ==================== */
 .btn-primary,
-.btn-secondary,
 .btn-nav-danger,
 .btn-user-name,
 .btn-search,
-.btn-clear-filters {
+.btn-clear-filters,
+.btn-details,
+.btn-rent,
+.btn-list-details,
+.btn-list-rent {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -151,6 +153,30 @@
   background: #fecaca;
 }
 
+.btn-details,
+.btn-list-details {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.btn-details:hover,
+.btn-list-details:hover {
+  background: #e5e7eb;
+}
+
+.btn-rent,
+.btn-list-rent {
+  background: #667eea;
+  color: white;
+}
+
+.btn-rent:hover,
+.btn-list-rent:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
 /* ==================== HERO ==================== */
 .hero {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -182,7 +208,7 @@
   padding: 0 2rem;
 }
 
-/* ==================== FILTERS ==================== */
+/* ==================== FILTERS SECTION ==================== */
 .filters-section {
   background: white;
   padding: 2rem 0;
@@ -239,7 +265,7 @@
   border-color: #667eea;
 }
 
-/* ==================== VIEW CONTROLS ==================== */
+/* View Controls */
 .view-controls {
   display: flex;
   justify-content: space-between;
@@ -289,8 +315,10 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* ==================== LOADING & ERROR ==================== */
-.loading-container {
+/* ==================== LOADING & ERROR STATES ==================== */
+.loading-container,
+.error-container,
+.no-results {
   text-align: center;
   padding: 4rem 2rem;
 }
@@ -310,11 +338,6 @@
   100% { transform: rotate(360deg); }
 }
 
-.error-container {
-  text-align: center;
-  padding: 4rem 2rem;
-}
-
 .error-message {
   background: #fee2e2;
   color: #dc2626;
@@ -323,11 +346,7 @@
   margin-bottom: 1.5rem;
   font-weight: 600;
   display: inline-block;
-}
-
-.no-results {
-  text-align: center;
-  padding: 4rem 2rem;
+  border-left: 4px solid #ef4444;
 }
 
 .no-results-icon {
@@ -469,32 +488,7 @@
 .btn-rent {
   flex: 1;
   padding: 0.875rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: none;
   font-size: 0.95rem;
-}
-
-.btn-details {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.btn-details:hover {
-  background: #e5e7eb;
-}
-
-.btn-rent {
-  background: #667eea;
-  color: white;
-}
-
-.btn-rent:hover {
-  background: #5568d3;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
 /* ==================== LIST VIEW ==================== */
@@ -613,33 +607,7 @@
 .btn-list-details,
 .btn-list-rent {
   padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: none;
-  font-size: 0.95rem;
   text-align: center;
-}
-
-.btn-list-details {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.btn-list-details:hover {
-  background: #e5e7eb;
-}
-
-.btn-list-rent {
-  background: #667eea;
-  color: white;
-}
-
-.btn-list-rent:hover {
-  background: #5568d3;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 /* ==================== TABLE VIEW ==================== */
@@ -816,6 +784,10 @@
     flex-wrap: wrap;
   }
 
+  .logo-image {
+    height: 50px;
+  }
+
   .search-bar {
     flex-direction: column;
   }
@@ -854,5 +826,15 @@
 
   .vehicles-table {
     min-width: 800px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-image {
+    height: 40px;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
   }
 }

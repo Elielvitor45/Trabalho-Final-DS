@@ -7,7 +7,7 @@ import { takeUntil } from 'rxjs/operators';
 import { VeiculoDTO } from '../../dto/veiculo.dto';
 import { LocacaoCreateDTO } from '../../services/locacao';
 import { VeiculoService } from '../../services/veiculo';
-import { Locacao } from '../../services/locacao';
+import { LocacaoService } from '../../services/locacao';
 import { Auth } from '../../services/auth';
 
 @Component({
@@ -46,7 +46,7 @@ export class VeiculoDetalhesComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private veiculoService: VeiculoService,
-    private locacaoService: Locacao,
+    private locacaoService: LocacaoService,
     private authService: Auth,
     private cdr: ChangeDetectorRef
   ) {

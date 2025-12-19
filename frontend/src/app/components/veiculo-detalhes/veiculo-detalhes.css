@@ -29,10 +29,10 @@
   align-items: center;
 }
 
+/* Logo */
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   cursor: pointer;
   transition: transform 0.3s;
 }
@@ -41,19 +41,18 @@
   transform: scale(1.05);
 }
 
-.logo-icon {
-  font-size: 1.8rem;
+.logo-image {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  transition: filter 0.3s ease;
 }
 
-.logo-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.logo-image:hover {
+  filter: brightness(1.1);
 }
 
+/* Nav Links */
 .nav-links {
   display: flex;
   gap: 2rem;
@@ -141,6 +140,47 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
+.btn-confirmar {
+  width: 100%;
+  padding: 1.25rem;
+  background: #667eea;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.btn-confirmar:hover:not(:disabled) {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.btn-confirmar:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-cta-primary {
+  padding: 1.25rem 3rem;
+  background: #667eea;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.btn-cta-primary:hover:not(:disabled) {
+  background: #5568d3;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+}
+
+.btn-cta-primary:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ==================== LOADING & ERROR ==================== */
 .loading-overlay {
   position: fixed;
@@ -218,7 +258,7 @@
   align-items: start;
 }
 
-/* ==================== SIDEBAR ==================== */
+/* ==================== SIDEBAR VEÍCULO ==================== */
 .sidebar-veiculo {
   background: white;
   border-radius: 12px;
@@ -298,6 +338,7 @@
   margin-top: 0.25rem;
 }
 
+/* Sidebar Sections */
 .sidebar-section {
   padding: 1.5rem 2rem;
   border-top: 1px solid #f3f4f6;
@@ -530,6 +571,17 @@
   line-height: 1.6;
 }
 
+.form-actions {
+  margin-top: 1rem;
+}
+
+.form-note {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
 /* ==================== RESUMO ==================== */
 .resumo-card {
   background: #f9fafb;
@@ -577,39 +629,6 @@
   font-weight: 700;
 }
 
-/* ==================== ACTIONS ==================== */
-.form-actions {
-  margin-top: 1rem;
-}
-
-.btn-confirmar {
-  width: 100%;
-  padding: 1.25rem;
-  background: #667eea;
-  color: white;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.btn-confirmar:hover:not(:disabled) {
-  background: #5568d3;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
-}
-
-.btn-confirmar:disabled {
-  background: #cbd5e1;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.form-note {
-  text-align: center;
-  color: #6b7280;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-}
-
 /* ==================== CTA CARD ==================== */
 .cta-card {
   background: linear-gradient(135deg, #f9fafb 0%, white 100%);
@@ -638,26 +657,6 @@
   font-size: 1.125rem;
   margin-bottom: 2rem;
   line-height: 1.6;
-}
-
-.btn-cta-primary {
-  padding: 1.25rem 3rem;
-  background: #667eea;
-  color: white;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.btn-cta-primary:hover:not(:disabled) {
-  background: #5568d3;
-  transform: translateY(-3px);
-  box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
-}
-
-.btn-cta-primary:disabled {
-  background: #cbd5e1;
-  cursor: not-allowed;
-  transform: none;
 }
 
 .cta-note {
@@ -746,6 +745,10 @@
     flex-wrap: wrap;
   }
 
+  .logo-image {
+    height: 50px;
+  }
+
   .form-row-2 {
     grid-template-columns: 1fr;
   }
@@ -760,5 +763,19 @@
 
   .cta-title {
     font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-image {
+    height: 40px;
+  }
+
+  .veiculo-nome {
+    font-size: 1.25rem;
+  }
+
+  .content-title {
+    font-size: 1.25rem;
   }
 }

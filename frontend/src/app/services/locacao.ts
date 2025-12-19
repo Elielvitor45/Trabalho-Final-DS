@@ -34,10 +34,10 @@ export interface ResumoLocacaoDTO {
 @Injectable({
   providedIn: 'root',
 })
-export class Locacao {
+export class LocacaoService {
   private apiUrl = 'http://localhost:8080/api/locacoes'; // URL direta
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');

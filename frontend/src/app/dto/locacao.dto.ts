@@ -6,15 +6,22 @@ export interface LocacaoCreateDTO {
   observacoes?: string;
 }
 
+
 export interface LocacaoDTO {
   id: number;
   dataRetirada: string;
   dataDevolucao: string;
-  observacoes?: string;
   valorTotal: number;
-  status: StatusLocacao;
-  veiculo: any;
+  status: 'ATIVA' | 'FINALIZADA' | 'CANCELADA';
+  observacoes?: string;
+  veiculo?: {
+    id: number;
+    marca: string;
+    modelo: string;
+    placa?: string;
+  };
   usuario: any;
 }
+
 
 export type StatusLocacao = 'ATIVA' | 'FINALIZADA' | 'CANCELADA';

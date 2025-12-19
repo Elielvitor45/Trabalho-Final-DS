@@ -5,7 +5,11 @@ import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { UsuarioPerfil } from '../../models/user.model';
 import { EstatisticasDTO } from '../../dto/auth.dto';
-import { LocacaoDTO, StatusLocacao } from '../../services/locacao';
+import { LocacaoDTO, StatusLocacao } from '../../dto/locacao.dto';   // ✅ Adicionado
+import { VeiculoDTO } from '../../dto/veiculo.dto';                 // ✅ Adicionado
+import { LocacaoService } from '../../services/locacao';
+import { VeiculoService } from '../../services/veiculo';
+
 
 @Component({
   selector: 'app-perfil',
@@ -33,7 +37,9 @@ export class Perfil implements OnInit {
     private authService: Auth,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private locacaoService: LocacaoService,
+    private veiculoService: VeiculoService
   ) {
     this.initEnderecoForm();
   }
@@ -43,7 +49,7 @@ export class Perfil implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-    
+
     this.loadUserProfile();
     this.loadEstatisticas();
   }
@@ -63,7 +69,7 @@ export class Perfil implements OnInit {
   loadUserProfile(): void {
     this.loading = true;
     this.errorMessage = '';
-    
+
     this.authService.getUserProfile().subscribe({
       next: (data) => {
         this.user = data;
@@ -75,7 +81,7 @@ export class Perfil implements OnInit {
         this.errorMessage = error.error?.message || 'Erro ao carregar perfil. Tente novamente.';
         this.loading = false;
         this.cdr.detectChanges();
-        
+
         if (error.status === 401 || error.status === 403) {
           this.authService.logout();
         }
@@ -85,7 +91,7 @@ export class Perfil implements OnInit {
 
   loadEstatisticas(): void {
     this.loadingEstatisticas = true;
-    
+
     this.authService.getEstatisticas().subscribe({
       next: (data) => {
         console.log('📊 Estatísticas recebidas do backend:', data);
@@ -109,18 +115,17 @@ export class Perfil implements OnInit {
 
     this.loadingLocacoes = true;
     this.mostrarHistorico = true;
-    
+
     this.authService.getHistoricoLocacoes().subscribe({
       next: (data: any) => {
         this.locacoes = data as LocacaoDTO[];
         console.log('📜 Locações carregadas:', this.locacoes);
-        
-        // ✅ Se backend retornar valorTotalGasto = 0 mas existem locações, recalcula
+
         if (this.estatisticas && this.estatisticas.valorTotalGasto === 0 && this.locacoes.length > 0) {
           console.warn('⚠️ Backend retornou valorTotalGasto = 0, recalculando...');
           this.calcularEstatisticasManualmente();
         }
-        
+
         this.loadingLocacoes = false;
         this.cdr.detectChanges();
       },
@@ -133,52 +138,43 @@ export class Perfil implements OnInit {
     });
   }
 
-  /**
-   * ✅ Calcula estatísticas manualmente quando backend falha
-   */
   private calcularEstatisticasManualmente(): void {
     if (!this.locacoes || this.locacoes.length === 0) {
       console.warn('⚠️ Nenhuma locação para calcular');
       return;
     }
-    
+
     let totalGasto = 0;
     let ativas = 0;
     let finalizadas = 0;
-    
+
     this.locacoes.forEach(locacao => {
       console.log(`Locação ID ${locacao.id}: R$ ${locacao.valorTotal} - Status: ${locacao.status}`);
-      
-      // Soma o valor total
+
       if (locacao.valorTotal) {
         totalGasto += locacao.valorTotal;
       }
-      
-      // Conta status (apenas os válidos do enum)
+
       if (locacao.status === 'ATIVA') {
         ativas++;
       } else if (locacao.status === 'FINALIZADA') {
         finalizadas++;
       }
     });
-    
-    // ✅ Atualiza estatísticas com TODOS os campos obrigatórios
+
     this.estatisticas = {
       totalLocacoes: this.locacoes.length,
       locacoesAtivas: ativas,
       locacoesFinalizadas: finalizadas,
       valorTotalGasto: totalGasto
     };
-    
+
     console.log('✅ Estatísticas recalculadas manualmente:', this.estatisticas);
     this.cdr.detectChanges();
   }
 
-  /**
-   * ✅ Retorna classe CSS baseada no status (apenas status válidos)
-   */
   getStatusClass(status: StatusLocacao): string {
-    switch(status) {
+    switch (status) {
       case 'ATIVA':
         return 'status-ativa';
       case 'FINALIZADA':
@@ -208,7 +204,7 @@ export class Perfil implements OnInit {
     this.editandoEndereco = true;
     this.successMessage = '';
     this.errorMessage = '';
-    
+
     if (this.user?.endereco) {
       this.enderecoForm.patchValue({
         cep: this.user.endereco.cep,
@@ -236,20 +232,20 @@ export class Perfil implements OnInit {
       this.markFormAsTouched();
       return;
     }
-    
+
     this.salvandoEndereco = true;
     this.errorMessage = '';
     this.successMessage = '';
-    
+
     const enderecoData = this.enderecoForm.value;
-    
+
     this.authService.updateEndereco(enderecoData).subscribe({
       next: () => {
         this.successMessage = 'Endereço salvo com sucesso!';
         this.salvandoEndereco = false;
         this.editandoEndereco = false;
         this.cdr.detectChanges();
-        
+
         setTimeout(() => {
           this.loadUserProfile();
           this.successMessage = '';
@@ -300,4 +296,59 @@ export class Perfil implements OnInit {
   logout(): void {
     this.authService.logout();
   }
+
+  desativarLocacao(locacao: LocacaoDTO): void {
+    if (!locacao.id) {
+      console.error('ID da locação não encontrado');
+      return;
+    }
+
+    if (confirm(`Deseja finalizar esta locação e marcar o veículo como disponível?`)) {
+      this.locacaoService.finalizarLocacao(locacao.id).subscribe({
+        next: () => {
+          console.log('Locação finalizada com sucesso');
+
+          if (locacao.veiculo?.id) {
+            this.veiculoService.updateDisponibilidade(locacao.veiculo.id, true).subscribe({
+              next: (veiculoAtualizado: VeiculoDTO) => {
+                console.log('Veículo marcado como disponível:', veiculoAtualizado);
+                this.atualizarPagina();  
+              },
+              error: (err) => {
+                console.error('Erro ao atualizar disponibilidade:', err);
+                this.atualizarPagina();  
+              }
+            });
+          } else {
+            this.atualizarPagina();  
+          }
+        },
+        error: (err) => {
+          console.error('Erro ao finalizar locação:', err);
+          alert('Erro ao finalizar a locação. Tente novamente.');
+        }
+      });
+    }
+  }
+
+  /**
+   * Atualiza histórico e estatísticas
+   */
+  private atualizarPagina(): void {
+    // Limpa o array de locações para forçar reload
+    this.locacoes = [];
+    this.mostrarHistorico = false;
+
+    // Recarrega estatísticas
+    this.loadEstatisticas();
+
+    // Recarrega histórico
+    this.loadHistoricoLocacoes();
+
+    // Força detecção de mudanças
+    this.cdr.detectChanges();
+
+    console.log('✅ Página atualizada com sucesso');
+  }
+
 }

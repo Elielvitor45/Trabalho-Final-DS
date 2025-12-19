@@ -3,13 +3,13 @@
   <nav class="navbar">
     <div class="nav-content">
       <div class="logo" (click)="goToHome()">
-        <span class="logo-icon">🚗</span>
-        <span class="logo-text">LocadoraMax</span>
+        <img src="images/Logo-Carro.png" alt="Logo" class="logo-image">
       </div>
+
 
       <div class="nav-links">
         <a (click)="goToHome()">Home</a>
-        
+
         <div *ngIf="isAuthenticated" class="nav-user">
           <button class="btn-user-name" (click)="goToPerfil()">
             👤 Olá, {{ firstName }}
@@ -18,7 +18,7 @@
             🚪 Sair
           </button>
         </div>
-        
+
         <button *ngIf="!isAuthenticated" class="btn-primary" (click)="goToLogin()">
           👤 Entrar
         </button>
@@ -39,13 +39,8 @@
     <div class="container">
       <!-- Barra de Pesquisa -->
       <div class="search-bar">
-        <input 
-          type="text" 
-          [(ngModel)]="termoPesquisa"
-          (keyup.enter)="pesquisar()"
-          placeholder="Buscar por modelo, marca ou categoria..."
-          class="search-input"
-        >
+        <input type="text" [(ngModel)]="termoPesquisa" (keyup.enter)="pesquisar()"
+          placeholder="Buscar por modelo, marca ou categoria..." class="search-input">
         <button class="btn-search" (click)="pesquisar()">
           🔍 Buscar
         </button>
@@ -53,24 +48,17 @@
 
       <!-- Filtros de Categoria -->
       <div class="category-filters">
-        <button 
-          class="filter-btn"
-          [class.active]="categoriaSelecionada === 'Todos'"
+        <button class="filter-btn" [class.active]="categoriaSelecionada === 'Todos'"
           (click)="filtrarPorCategoria('Todos')">
           Todos
         </button>
-        
-        <button 
-          *ngFor="let categoria of categorias"
-          class="filter-btn"
-          [class.active]="categoriaSelecionada === categoria"
-          (click)="filtrarPorCategoria(categoria)">
+
+        <button *ngFor="let categoria of categorias" class="filter-btn"
+          [class.active]="categoriaSelecionada === categoria" (click)="filtrarPorCategoria(categoria)">
           {{ categoria }}
         </button>
-        
-        <button 
-          *ngIf="categoriaSelecionada !== 'Todos' || termoPesquisa"
-          class="btn-clear-filters"
+
+        <button *ngIf="categoriaSelecionada !== 'Todos' || termoPesquisa" class="btn-clear-filters"
           (click)="limparFiltros()">
           ✖ Limpar Filtros
         </button>
@@ -80,30 +68,21 @@
       <div class="view-controls">
         <div class="results-info">
           <p *ngIf="!loading">
-            <strong>{{ veiculosFiltrados.length }}</strong> 
+            <strong>{{ veiculosFiltrados.length }}</strong>
             {{ veiculosFiltrados.length === 1 ? 'veículo encontrado' : 'veículos encontrados' }}
           </p>
         </div>
 
         <div class="view-toggle">
-          <button 
-            class="view-btn"
-            [class.active]="modoVisualizacao === 'grid'"
-            (click)="mudarVisualizacao('grid')"
+          <button class="view-btn" [class.active]="modoVisualizacao === 'grid'" (click)="mudarVisualizacao('grid')"
             title="Visualização em Grade">
             ▦ Grade
           </button>
-          <button 
-            class="view-btn"
-            [class.active]="modoVisualizacao === 'lista'"
-            (click)="mudarVisualizacao('lista')"
+          <button class="view-btn" [class.active]="modoVisualizacao === 'lista'" (click)="mudarVisualizacao('lista')"
             title="Visualização em Lista">
             ☰ Lista
           </button>
-          <button 
-            class="view-btn"
-            [class.active]="modoVisualizacao === 'tabela'"
-            (click)="mudarVisualizacao('tabela')"
+          <button class="view-btn" [class.active]="modoVisualizacao === 'tabela'" (click)="mudarVisualizacao('tabela')"
             title="Visualização em Tabela">
             ▤ Tabela
           </button>
@@ -139,28 +118,25 @@
       <div *ngIf="veiculosFiltrados.length > 0 && modoVisualizacao === 'grid'" class="vehicles-grid">
         <div *ngFor="let veiculo of veiculosFiltrados" class="vehicle-card">
           <div class="badge-categoria">{{ veiculo.categoria }}</div>
-          
+
           <div class="vehicle-image-wrapper">
-            <img 
-              [src]="getImagemVeiculo(veiculo)" 
-              [alt]="veiculo.marca + ' ' + veiculo.modelo"
-              class="vehicle-image-real"
-            >
+            <img [src]="getImagemVeiculo(veiculo)" [alt]="veiculo.marca + ' ' + veiculo.modelo"
+              class="vehicle-image-real">
           </div>
-          
+
           <h3 class="vehicle-title">{{ veiculo.marca }} {{ veiculo.modelo }}</h3>
           <p class="vehicle-year">{{ veiculo.ano }}</p>
-          
+
           <div class="vehicle-price">
             {{ formatarValor(veiculo.valorDiaria) }}<span class="price-period">/dia</span>
           </div>
-          
+
           <ul class="vehicle-features">
             <li><span class="feature-icon">✓</span> Placa: {{ veiculo.placa }}</li>
             <li><span class="feature-icon">✓</span> {{ veiculo.categoria }}</li>
             <li *ngIf="veiculo.disponivel"><span class="feature-icon">✓</span> Disponível</li>
           </ul>
-          
+
           <div class="vehicle-actions">
             <button class="btn-details" (click)="verDetalhes(veiculo.id)">
               👁️ Detalhes
@@ -176,13 +152,10 @@
       <div *ngIf="veiculosFiltrados.length > 0 && modoVisualizacao === 'lista'" class="vehicles-list">
         <div *ngFor="let veiculo of veiculosFiltrados" class="vehicle-list-item">
           <div class="list-item-image">
-            <img 
-              [src]="getImagemVeiculo(veiculo)" 
-              [alt]="veiculo.marca + ' ' + veiculo.modelo"
-            >
+            <img [src]="getImagemVeiculo(veiculo)" [alt]="veiculo.marca + ' ' + veiculo.modelo">
             <div class="list-badge">{{ veiculo.categoria }}</div>
           </div>
-          
+
           <div class="list-item-content">
             <div class="list-item-header">
               <h3 class="list-item-title">{{ veiculo.marca }} {{ veiculo.modelo }}</h3>
@@ -190,19 +163,19 @@
                 {{ formatarValor(veiculo.valorDiaria) }}<span>/dia</span>
               </div>
             </div>
-            
+
             <p class="list-item-subtitle">Ano: {{ veiculo.ano }} • Placa: {{ veiculo.placa }}</p>
-            
+
             <p class="list-item-description" *ngIf="veiculo.descricao">
               {{ veiculo.descricao }}
             </p>
-            
+
             <div class="list-item-features">
               <span class="list-feature">✓ {{ veiculo.categoria }}</span>
               <span class="list-feature" *ngIf="veiculo.disponivel">✓ Disponível agora</span>
             </div>
           </div>
-          
+
           <div class="list-item-actions">
             <button class="btn-list-details" (click)="verDetalhes(veiculo.id)">
               👁️ Ver Detalhes
@@ -232,11 +205,8 @@
           <tbody>
             <tr *ngFor="let veiculo of veiculosFiltrados">
               <td>
-                <img 
-                  [src]="getImagemVeiculo(veiculo)" 
-                  [alt]="veiculo.marca + ' ' + veiculo.modelo"
-                  class="table-vehicle-image"
-                >
+                <img [src]="getImagemVeiculo(veiculo)" [alt]="veiculo.marca + ' ' + veiculo.modelo"
+                  class="table-vehicle-image">
               </td>
               <td class="table-vehicle-name">
                 <strong>{{ veiculo.marca }}</strong><br>

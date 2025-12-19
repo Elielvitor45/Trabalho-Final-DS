@@ -1,18 +1,18 @@
 <div class="home-wrapper">
-  
+
   <!-- ==================== NAVBAR ==================== -->
   <nav class="navbar">
     <div class="nav-content">
       <div class="logo" (click)="goToHome()">
-        <span class="logo-icon">🚗</span>
-        <span class="logo-text">LocadoraMax</span>
+        <img src="images/Logo-Carro.png" alt="Logo" class="logo-image">
       </div>
-      
+
+
       <div class="nav-links">
         <a (click)="scrollToServices()">Serviços</a>
         <a (click)="goToVeiculos()">Veículos</a>
         <a (click)="scrollToContact()">Contato</a>
-        
+
         <div *ngIf="isAuthenticated" class="nav-user">
           <button class="btn-user-name" (click)="goToPerfil()">
             👤 Olá, {{ firstName }}
@@ -21,7 +21,7 @@
             🚪 Sair
           </button>
         </div>
-        
+
         <button *ngIf="!isAuthenticated" class="btn-primary" (click)="goToLogin()">
           👤 Entrar
         </button>
@@ -30,7 +30,7 @@
   </nav>
 
   <!-- ==================== HERO SECTION ==================== -->
-  <section class="hero">
+  <section class="hero hero-with-bg">
     <div class="hero-content">
       <h1 class="hero-title">Alugue o Carro Perfeito</h1>
       <p class="hero-subtitle">
@@ -43,14 +43,15 @@
     </div>
   </section>
 
+
   <!-- ==================== MAIN CONTENT ==================== -->
   <main class="main-content">
-    
+
     <!-- SERVIÇOS -->
     <section id="servicos" class="section-container section-white">
       <div class="container">
         <h2 class="section-title">Por que escolher a LocadoraMax?</h2>
-        
+
         <div class="services-grid">
           <div class="service-card">
             <div class="service-icon">🚗</div>
@@ -99,9 +100,9 @@
             Ver Todos →
           </button>
         </div>
-        
+
         <div class="vehicles-grid">
-          
+
           <!-- Econômico -->
           <div class="vehicle-card">
             <div class="vehicle-icon">🚙</div>
@@ -113,7 +114,7 @@
                 <span class="price-period">/dia</span>
               </div>
             </div>
-            
+
             <div class="vehicle-features">
               <div class="feature-item">
                 <span class="feature-icon">✓</span>
@@ -128,7 +129,7 @@
                 <span>4 portas</span>
               </div>
             </div>
-            
+
             <button class="btn-vehicle" (click)="goToVeiculosPorCategoria('Econômico')">
               Ver Disponíveis
             </button>
@@ -140,7 +141,7 @@
               <span class="badge-icon">⭐</span>
               <span>Mais Popular</span>
             </div>
-            
+
             <div class="vehicle-icon">🚗</div>
             <div class="vehicle-info">
               <h3 class="vehicle-name">SUV</h3>
@@ -150,7 +151,7 @@
                 <span class="price-period">/dia</span>
               </div>
             </div>
-            
+
             <div class="vehicle-features">
               <div class="feature-item">
                 <span class="feature-icon">✓</span>
@@ -165,7 +166,7 @@
                 <span>5 lugares confortáveis</span>
               </div>
             </div>
-            
+
             <button class="btn-vehicle btn-vehicle-featured" (click)="goToVeiculosPorCategoria('SUV')">
               Ver Disponíveis
             </button>
@@ -182,7 +183,7 @@
                 <span class="price-period">/dia</span>
               </div>
             </div>
-            
+
             <div class="vehicle-features">
               <div class="feature-item">
                 <span class="feature-icon">✓</span>
@@ -197,12 +198,12 @@
                 <span>Alto desempenho</span>
               </div>
             </div>
-            
+
             <button class="btn-vehicle" (click)="goToVeiculosPorCategoria('Luxo')">
               Ver Disponíveis
             </button>
           </div>
-          
+
         </div>
       </div>
     </section>
@@ -211,7 +212,7 @@
     <section class="section-container section-white">
       <div class="container">
         <h2 class="section-title">Como Funciona</h2>
-        
+
         <div class="steps-grid">
           <div class="step-card">
             <div class="step-number">1</div>
@@ -245,7 +246,7 @@
       <div class="container">
         <h2 class="section-title">Entre em Contato</h2>
         <p class="section-subtitle">Estamos prontos para ajudar você</p>
-        
+
         <div class="contact-grid">
           <div class="contact-card">
             <div class="contact-icon-wrapper">

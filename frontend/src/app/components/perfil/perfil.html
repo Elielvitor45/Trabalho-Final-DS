@@ -7,14 +7,13 @@
 
   <!-- Conteúdo -->
   <div *ngIf="!loading && user" class="perfil-layout">
-    
+
     <!-- Navbar -->
     <nav class="navbar-perfil">
       <div class="navbar-content">
         <div class="logo" (click)="goToHome()">
-          <span class="logo-icon">🚗</span>
-          <span class="logo-text">LocadoraMax</span>
-        </div>
+        <img src="images/Logo-Carro.png" alt="Logo" class="logo-image">
+      </div>
         <div class="navbar-actions">
           <button class="btn-nav" (click)="goToHome()">
             🏠 Home
@@ -28,7 +27,7 @@
 
     <!-- Container Principal -->
     <div class="perfil-container">
-      
+
       <!-- Sidebar -->
       <aside class="sidebar">
         <!-- Avatar e Nome -->
@@ -43,7 +42,7 @@
         <!-- Informações de Contato -->
         <div class="sidebar-section">
           <h3 class="sidebar-title">Informações Pessoais</h3>
-          
+
           <div class="contact-item">
             <span class="contact-icon">📋</span>
             <div class="contact-info">
@@ -72,7 +71,7 @@
         <!-- Estatísticas Rápidas -->
         <div class="sidebar-section" *ngIf="!loadingEstatisticas && estatisticas">
           <h3 class="sidebar-title">📊 Estatísticas</h3>
-          
+
           <div class="stat-mini">
             <span class="stat-mini-value">{{ estatisticas.totalLocacoes }}</span>
             <span class="stat-mini-label">Total Locações</span>
@@ -92,12 +91,12 @@
 
       <!-- Conteúdo Principal -->
       <main class="main-content">
-        
+
         <!-- Mensagens -->
         <div *ngIf="successMessage" class="alert alert-success">
           ✓ {{ successMessage }}
         </div>
-        
+
         <div *ngIf="errorMessage" class="alert alert-error">
           ✗ {{ errorMessage }}
         </div>
@@ -135,7 +134,8 @@
             <div class="form-row">
               <div class="form-col-3">
                 <label>CEP *</label>
-                <input type="text" formControlName="cep" placeholder="00000-000" maxlength="8" (input)="formatCEPInput($event)">
+                <input type="text" formControlName="cep" placeholder="00000-000" maxlength="8"
+                  (input)="formatCEPInput($event)">
                 <span class="form-error" *ngIf="enderecoForm.get('cep')?.invalid && enderecoForm.get('cep')?.touched">
                   CEP inválido
                 </span>
@@ -172,7 +172,8 @@
 
               <div class="form-col-4">
                 <label>Estado *</label>
-                <input type="text" formControlName="estado" placeholder="SP" maxlength="2" style="text-transform: uppercase;">
+                <input type="text" formControlName="estado" placeholder="SP" maxlength="2"
+                  style="text-transform: uppercase;">
               </div>
             </div>
 
@@ -208,8 +209,12 @@
                   <h3 class="timeline-title">
                     {{ locacao.veiculo?.marca || 'Veículo' }} {{ locacao.veiculo?.modelo || '' }}
                   </h3>
-                  <span class="badge" [ngClass]="getStatusClass(locacao.status)">
-                    {{ locacao.status }}
+                  <span class="badge badge-hover-text" [ngClass]="getStatusClass(locacao.status)"
+                    [class.badge-ativa-hover]="locacao.status === 'ATIVA'"
+                    (click)="locacao.status === 'ATIVA' ? desativarLocacao(locacao) : null"
+                    [style.cursor]="locacao.status === 'ATIVA' ? 'pointer' : 'default'">
+                    <span class="badge-text-normal">{{ locacao.status }}</span>
+                    <span class="badge-text-hover">DESATIVAR</span>
                   </span>
                 </div>
                 <div class="timeline-details">
