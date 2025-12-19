@@ -16,7 +16,7 @@ services:
     networks:
       - locadora-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -33,31 +33,36 @@ services:
       mysql-db:
         condition: service_healthy
     environment:
-      MYSQL_HOST: mysql-db
-      MYSQL_PORT: 3306
-      MYSQL_DATABASE: locadora_db
-      MYSQL_USERNAME: locadora_user
-      MYSQL_PASSWORD: 1234
-      JWT_SECRET: locadora-secret-key-super-segura-mude-em-producao
+      # Spring Boot properties padrão
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/locadora_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: locadora_user
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_PROFILES_ACTIVE: dev
+      
+      # JWT properties (mínimo 256 bits = 32 caracteres)
+      JWT_SECRET: locadora-secret-key-super-segura-com-256-bits-minimo-para-hs256-funcionar
       JWT_EXPIRATION: 86400000
     ports:
       - "8080:8080"
     networks:
       - locadora-network
 
-  # Angular Frontend
-  angular-frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: locadora-frontend
-    restart: unless-stopped
-    depends_on:
-      - spring-backend
-    ports:
-      - "4200:80"
-    networks:
-      - locadora-network
+  # Angular Frontend - DESABILITADO TEMPORARIAMENTE
+  # Descomente quando quiser rodar o frontend
+  # angular-frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: locadora-frontend
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - spring-backend
+  #   ports:
+  #     - "4200:80"
+  #   networks:
+  #     - locadora-network
 
 volumes:
   mysql_data:

@@ -4,7 +4,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { UsuarioPerfil } from '../../models/user.model';
-import { EstatisticasDTO, LocacaoDTO } from '../../dto/auth.dto';
+import { EstatisticasDTO } from '../../dto/auth.dto';
+import { LocacaoDTO, StatusLocacao } from '../../services/locacao';  // ✅ IMPORT CORRETO
 
 @Component({
   selector: 'app-perfil',
@@ -22,7 +23,7 @@ export class Perfil implements OnInit {
   salvandoEndereco = false;
   enderecoForm!: FormGroup;
 
-  // Novas propriedades
+  // Locações e Estatísticas - USANDO O DTO CORRETO
   locacoes: LocacaoDTO[] = [];
   estatisticas: EstatisticasDTO | null = null;
   loadingLocacoes = false;
@@ -63,6 +64,7 @@ export class Perfil implements OnInit {
   loadUserProfile(): void {
     this.loading = true;
     this.errorMessage = '';
+    
     this.authService.getUserProfile().subscribe({
       next: (data) => {
         this.user = data;
@@ -74,6 +76,7 @@ export class Perfil implements OnInit {
         this.errorMessage = error.error?.message || 'Erro ao carregar perfil. Tente novamente.';
         this.loading = false;
         this.cdr.detectChanges();
+        
         if (error.status === 401 || error.status === 403) {
           this.authService.logout();
         }
@@ -81,9 +84,9 @@ export class Perfil implements OnInit {
     });
   }
 
-  // Nova função: carregar estatísticas
   loadEstatisticas(): void {
     this.loadingEstatisticas = true;
+    
     this.authService.getEstatisticas().subscribe({
       next: (data) => {
         this.estatisticas = data;
@@ -98,7 +101,6 @@ export class Perfil implements OnInit {
     });
   }
 
-  // Nova função: carregar histórico de locações
   loadHistoricoLocacoes(): void {
     if (this.locacoes.length > 0) {
       this.mostrarHistorico = !this.mostrarHistorico;
@@ -106,43 +108,45 @@ export class Perfil implements OnInit {
     }
 
     this.loadingLocacoes = true;
+    this.mostrarHistorico = true;
+    
+    // ✅ CASTING para o tipo correto
     this.authService.getHistoricoLocacoes().subscribe({
-      next: (data) => {
-        this.locacoes = data;
-        this.mostrarHistorico = true;
+      next: (data: any) => {
+        this.locacoes = data as LocacaoDTO[];
         this.loadingLocacoes = false;
         this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Erro ao carregar histórico:', error);
         this.loadingLocacoes = false;
+        this.mostrarHistorico = false;
         this.cdr.detectChanges();
       }
     });
   }
 
-  getStatusClass(status: string): string {
-    switch(status.toLowerCase()) {
-      case 'ativa':
-      case 'em andamento':
+  getStatusClass(status: StatusLocacao): string {
+    switch(status) {
+      case 'ATIVA':
         return 'status-ativa';
-      case 'finalizada':
-      case 'concluída':
+      case 'FINALIZADA':
         return 'status-finalizada';
-      case 'cancelada':
+      case 'CANCELADA':
         return 'status-cancelada';
       default:
         return 'status-default';
     }
   }
 
-  formatarData(data: string): string {
+  formatarData(data: string | Date): string {
     if (!data) return '';
     const date = new Date(data);
     return date.toLocaleDateString('pt-BR');
   }
 
   formatarValor(valor: number): string {
+    if (!valor) return 'R$ 0,00';
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
@@ -193,16 +197,18 @@ export class Perfil implements OnInit {
         this.successMessage = 'Endereço salvo com sucesso!';
         this.salvandoEndereco = false;
         this.editandoEndereco = false;
+        this.cdr.detectChanges();
+        
         setTimeout(() => {
           this.loadUserProfile();
           this.successMessage = '';
         }, 2000);
-        this.goToPerfil();
       },
       error: (error) => {
         console.error('Erro ao salvar endereço:', error);
         this.errorMessage = error.error?.message || 'Erro ao salvar endereço. Tente novamente.';
         this.salvandoEndereco = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -238,10 +244,6 @@ export class Perfil implements OnInit {
 
   goToHome(): void {
     this.router.navigate(['/home']);
-  }
-
-  goToPerfil(): void {
-    this.router.navigate(['/perfil']);
   }
 
   logout(): void {

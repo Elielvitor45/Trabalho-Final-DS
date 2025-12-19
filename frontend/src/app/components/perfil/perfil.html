@@ -1,287 +1,244 @@
-<div class="perfil-container">
+<div class="perfil-wrapper">
   <!-- Loading -->
-  <div *ngIf="loading" class="loading-container">
+  <div *ngIf="loading" class="loading-overlay">
     <div class="spinner"></div>
     <p>Carregando perfil...</p>
   </div>
 
-  <!-- Error -->
-  <div *ngIf="!loading && errorMessage && !user" class="error-container">
-    <div class="error-message">{{ errorMessage }}</div>
-    <button class="btn-primary" (click)="goToHome()">Voltar para Home</button>
+  <!-- Conteúdo -->
+  <div *ngIf="!loading && user" class="perfil-layout">
+    
+    <!-- Navbar -->
+    <nav class="navbar-perfil">
+      <div class="navbar-content">
+        <div class="logo" (click)="goToHome()">
+          <span class="logo-icon">🚗</span>
+          <span class="logo-text">LocadoraMax</span>
+        </div>
+        <div class="navbar-actions">
+          <button class="btn-nav" (click)="goToHome()">🏠 Home</button>
+          <button class="btn-nav-danger" (click)="logout()">🚪 Sair</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Container Principal -->
+    <div class="perfil-container">
+      
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <!-- Avatar e Nome -->
+        <div class="profile-header">
+          <div class="avatar-large">
+            {{ user.nome ? user.nome.charAt(0).toUpperCase() : '?' }}
+          </div>
+          <h1 class="profile-name">{{ user.nome }}</h1>
+          <p class="profile-email">{{ user.email }}</p>
+        </div>
+
+        <!-- Informações de Contato -->
+        <div class="sidebar-section">
+          <h3 class="sidebar-title">Informações Pessoais</h3>
+          
+          <div class="contact-item">
+            <span class="contact-icon">📋</span>
+            <div class="contact-info">
+              <span class="contact-label">CPF</span>
+              <span class="contact-value">{{ formatCPF(user.cpf) || 'Não informado' }}</span>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <span class="contact-icon">📞</span>
+            <div class="contact-info">
+              <span class="contact-label">Telefone</span>
+              <span class="contact-value">{{ formatTelefone(user.telefone) || 'Não informado' }}</span>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <span class="contact-icon">✉️</span>
+            <div class="contact-info">
+              <span class="contact-label">Email</span>
+              <span class="contact-value">{{ user.email }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estatísticas Rápidas -->
+        <div class="sidebar-section" *ngIf="!loadingEstatisticas && estatisticas">
+          <h3 class="sidebar-title">📊 Estatísticas</h3>
+          
+          <div class="stat-mini">
+            <span class="stat-mini-value">{{ estatisticas.totalLocacoes }}</span>
+            <span class="stat-mini-label">Total Locações</span>
+          </div>
+
+          <div class="stat-mini">
+            <span class="stat-mini-value">{{ estatisticas.locacoesAtivas }}</span>
+            <span class="stat-mini-label">Ativas</span>
+          </div>
+
+          <div class="stat-mini">
+            <span class="stat-mini-value">{{ formatarValor(estatisticas.valorTotalGasto) }}</span>
+            <span class="stat-mini-label">Total Gasto</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Conteúdo Principal -->
+      <main class="main-content">
+        
+        <!-- Mensagens -->
+        <div *ngIf="successMessage" class="alert alert-success">
+          ✓ {{ successMessage }}
+        </div>
+        
+        <div *ngIf="errorMessage" class="alert alert-error">
+          ✗ {{ errorMessage }}
+        </div>
+
+        <!-- Endereço -->
+        <section class="content-section">
+          <div class="section-header-horizontal">
+            <h2 class="section-title-main">📍 Endereço</h2>
+            <button class="btn-icon" (click)="iniciarEdicaoEndereco()" *ngIf="!editandoEndereco">
+              {{ user.endereco ? '✏️ Editar' : '+ Adicionar' }}
+            </button>
+          </div>
+
+          <!-- Modo Visualização -->
+          <div *ngIf="!editandoEndereco && user.endereco" class="endereco-display">
+            <div class="endereco-line">
+              <strong>{{ user.endereco.logradouro }}, {{ user.endereco.numero }}</strong>
+              <span *ngIf="user.endereco.complemento"> - {{ user.endereco.complemento }}</span>
+            </div>
+            <div class="endereco-line">
+              {{ user.endereco.bairro }} - {{ user.endereco.cidade }}/{{ user.endereco.estado }}
+            </div>
+            <div class="endereco-line">
+              CEP: {{ formatCEP(user.endereco.cep) }}
+            </div>
+          </div>
+
+          <div *ngIf="!editandoEndereco && !user.endereco" class="empty-state">
+            <p>📭 Nenhum endereço cadastrado</p>
+            <small>Clique em "Adicionar" para cadastrar seu endereço</small>
+          </div>
+
+          <!-- Modo Edição -->
+          <form *ngIf="editandoEndereco" [formGroup]="enderecoForm" (ngSubmit)="salvarEndereco()" class="form-endereco">
+            <div class="form-row">
+              <div class="form-col-3">
+                <label>CEP *</label>
+                <input type="text" formControlName="cep" placeholder="00000-000" maxlength="8" (input)="formatCEPInput($event)">
+                <span class="form-error" *ngIf="enderecoForm.get('cep')?.invalid && enderecoForm.get('cep')?.touched">
+                  CEP inválido
+                </span>
+              </div>
+
+              <div class="form-col">
+                <label>Logradouro *</label>
+                <input type="text" formControlName="logradouro" placeholder="Rua, Avenida...">
+              </div>
+
+              <div class="form-col-3">
+                <label>Número *</label>
+                <input type="text" formControlName="numero" placeholder="123">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <label>Complemento</label>
+                <input type="text" formControlName="complemento" placeholder="Apto, Sala... (opcional)">
+              </div>
+
+              <div class="form-col">
+                <label>Bairro *</label>
+                <input type="text" formControlName="bairro" placeholder="Bairro">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <label>Cidade *</label>
+                <input type="text" formControlName="cidade" placeholder="Cidade">
+              </div>
+
+              <div class="form-col-4">
+                <label>Estado *</label>
+                <input type="text" formControlName="estado" placeholder="SP" maxlength="2" style="text-transform: uppercase;">
+              </div>
+            </div>
+
+            <div class="form-actions-inline">
+              <button type="button" class="btn-outline" (click)="cancelarEdicaoEndereco()">Cancelar</button>
+              <button type="submit" class="btn-primary-custom" [disabled]="enderecoForm.invalid || salvandoEndereco">
+                {{ salvandoEndereco ? 'Salvando...' : 'Salvar' }}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Histórico de Locações -->
+        <section class="content-section">
+          <div class="section-header-horizontal">
+            <h2 class="section-title-main">📋 Histórico de Locações</h2>
+            <button class="btn-icon" (click)="loadHistoricoLocacoes()">
+              {{ mostrarHistorico ? '▼ Ocultar' : '▶ Mostrar' }}
+            </button>
+          </div>
+
+          <div *ngIf="loadingLocacoes" class="empty-state">
+            <p>Carregando histórico...</p>
+          </div>
+
+          <div *ngIf="mostrarHistorico && !loadingLocacoes && locacoes.length > 0" class="timeline">
+            <div *ngFor="let locacao of locacoes; let i = index" class="timeline-item">
+              <div class="timeline-marker" [class.active]="locacao.status === 'ATIVA'"></div>
+              <div class="timeline-content">
+                <div class="timeline-header">
+                  <h3 class="timeline-title">
+                    {{ locacao.veiculo?.marca || 'Veículo' }} {{ locacao.veiculo?.modelo || '' }}
+                  </h3>
+                  <span class="badge" [ngClass]="getStatusClass(locacao.status)">
+                    {{ locacao.status }}
+                  </span>
+                </div>
+                <div class="timeline-details">
+                  <div class="detail-row">
+                    <span class="detail-icon">📅</span>
+                    <span>{{ formatarData(locacao.dataRetirada) }} até {{ formatarData(locacao.dataDevolucao) }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="detail-icon">💰</span>
+                    <strong class="valor-destaque">{{ formatarValor(locacao.valorTotal) }}</strong>
+                  </div>
+                  <div class="detail-row" *ngIf="locacao.observacoes">
+                    <span class="detail-icon">📝</span>
+                    <span>{{ locacao.observacoes }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="mostrarHistorico && !loadingLocacoes && locacoes.length === 0" class="empty-state">
+            <p>📭 Nenhuma locação encontrada</p>
+            <small>Quando você alugar um veículo, ele aparecerá aqui</small>
+          </div>
+        </section>
+
+      </main>
+    </div>
   </div>
 
-  <!-- Profile Content -->
-  <div *ngIf="!loading && user" class="perfil-card">
-    <!-- Header -->
-    <div class="perfil-header">
-      <div class="logo" (click)="goToHome()">
-        <h1>🚗 LocadoraMax</h1>
-      </div>
-
-      <div class="user-avatar">
-        <div class="avatar-circle">
-          {{ user.nome ? user.nome.charAt(0).toUpperCase() : '?' }}
-        </div>
-        <h2 class="user-name">{{ user.nome }}</h2>
-        <p class="user-email">{{ user.email }}</p>
-      </div>
-    </div>
-
-    <!-- User Info -->
-    <div class="perfil-content">
-      <!-- Messages -->
-      <div *ngIf="errorMessage" class="error-message">
-        {{ errorMessage }}
-      </div>
-
-      <div *ngIf="successMessage" class="success-message">
-        {{ successMessage }}
-      </div>
-
-      <!-- Informações Pessoais -->
-      <div class="section">
-        <h3 class="section-title">Informações Pessoais</h3>
-
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">📋 CPF</span>
-            <span class="info-value">{{ formatCPF(user.cpf) || 'Não informado' }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="info-label">📞 Telefone</span>
-            <span class="info-value">{{ formatTelefone(user.telefone) || 'Não informado' }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="info-label">✉️ Email</span>
-            <span class="info-value">{{ user.email }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Endereço - Modo Visualização -->
-      <div class="section" *ngIf="!editandoEndereco">
-        <div class="section-header">
-          <h3 class="section-title">Endereço</h3>
-          <button class="btn-edit" (click)="iniciarEdicaoEndereco()">
-            {{ user.endereco ? '✏️ Editar' : '+ Adicionar' }}
-          </button>
-        </div>
-
-        <div *ngIf="user.endereco" class="info-grid">
-          <div class="info-item full-width">
-            <span class="info-label">📍 Logradouro</span>
-            <span class="info-value">{{ user.endereco.logradouro }}, {{ user.endereco.numero }}</span>
-          </div>
-
-          <div class="info-item" *ngIf="user.endereco.complemento">
-            <span class="info-label">🏢 Complemento</span>
-            <span class="info-value">{{ user.endereco.complemento }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="info-label">🏘️ Bairro</span>
-            <span class="info-value">{{ user.endereco.bairro }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="info-label">🏙️ Cidade</span>
-            <span class="info-value">{{ user.endereco.cidade }} - {{ user.endereco.estado }}</span>
-          </div>
-
-          <div class="info-item">
-            <span class="info-label">📮 CEP</span>
-            <span class="info-value">{{ formatCEP(user.endereco.cep) }}</span>
-          </div>
-        </div>
-
-        <p *ngIf="!user.endereco" class="no-data">Nenhum endereço cadastrado</p>
-      </div>
-
-      <!-- Endereço - Modo Edição -->
-      <div class="section" *ngIf="editandoEndereco">
-        <h3 class="section-title">{{ user.endereco ? 'Editar Endereço' : 'Adicionar Endereço' }}</h3>
-
-        <form [formGroup]="enderecoForm" (ngSubmit)="salvarEndereco()" class="endereco-form">
-          <div class="form-row">
-            <div class="form-group form-group-small">
-              <label>CEP</label>
-              <input type="text" formControlName="cep" placeholder="00000000" maxlength="8"
-                (input)="formatCEPInput($event)"
-                [class.invalid]="enderecoForm.get('cep')?.invalid && enderecoForm.get('cep')?.touched">
-              <span class="error" *ngIf="enderecoForm.get('cep')?.invalid && enderecoForm.get('cep')?.touched">
-                CEP deve ter 8 dígitos
-              </span>
-            </div>
-
-            <div class="form-group">
-              <label>Logradouro</label>
-              <input type="text" formControlName="logradouro" placeholder="Rua, Avenida..."
-                [class.invalid]="enderecoForm.get('logradouro')?.invalid && enderecoForm.get('logradouro')?.touched">
-              <span class="error"
-                *ngIf="enderecoForm.get('logradouro')?.invalid && enderecoForm.get('logradouro')?.touched">
-                Logradouro é obrigatório
-              </span>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group form-group-small">
-              <label>Número</label>
-              <input type="text" formControlName="numero" placeholder="123"
-                [class.invalid]="enderecoForm.get('numero')?.invalid && enderecoForm.get('numero')?.touched">
-              <span class="error" *ngIf="enderecoForm.get('numero')?.invalid && enderecoForm.get('numero')?.touched">
-                Número é obrigatório
-              </span>
-            </div>
-
-            <div class="form-group">
-              <label>Complemento</label>
-              <input type="text" formControlName="complemento" placeholder="Apto, Sala... (opcional)">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Bairro</label>
-            <input type="text" formControlName="bairro" placeholder="Bairro"
-              [class.invalid]="enderecoForm.get('bairro')?.invalid && enderecoForm.get('bairro')?.touched">
-            <span class="error" *ngIf="enderecoForm.get('bairro')?.invalid && enderecoForm.get('bairro')?.touched">
-              Bairro é obrigatório
-            </span>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Cidade</label>
-              <input type="text" formControlName="cidade" placeholder="Cidade"
-                [class.invalid]="enderecoForm.get('cidade')?.invalid && enderecoForm.get('cidade')?.touched">
-              <span class="error" *ngIf="enderecoForm.get('cidade')?.invalid && enderecoForm.get('cidade')?.touched">
-                Cidade é obrigatória
-              </span>
-            </div>
-
-            <div class="form-group form-group-small">
-              <label>Estado</label>
-              <input type="text" formControlName="estado" placeholder="SP" maxlength="2"
-                style="text-transform: uppercase;"
-                [class.invalid]="enderecoForm.get('estado')?.invalid && enderecoForm.get('estado')?.touched">
-              <span class="error" *ngIf="enderecoForm.get('estado')?.invalid && enderecoForm.get('estado')?.touched">
-                Estado deve ter 2 letras
-              </span>
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-cancel" (click)="cancelarEdicaoEndereco()" [disabled]="salvandoEndereco">
-              Cancelar
-            </button>
-            <button type="submit" class="btn-save" [disabled]="salvandoEndereco || enderecoForm.invalid">
-              {{ salvandoEndereco ? 'Salvando...' : 'Salvar Endereço' }}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- ========== NOVAS SEÇÕES ========== -->
-
-      <!-- Seção de Estatísticas -->
-      <div class="section">
-        <h2 class="section-title">📊 Estatísticas</h2>
-
-        <div *ngIf="loadingEstatisticas" class="no-data">
-          <p>Carregando estatísticas...</p>
-        </div>
-
-        <div *ngIf="!loadingEstatisticas && estatisticas" class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">🚗</div>
-            <div class="stat-value">{{ estatisticas.totalLocacoes }}</div>
-            <div class="stat-label">Total de Locações</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon">✅</div>
-            <div class="stat-value">{{ estatisticas.locacoesAtivas }}</div>
-            <div class="stat-label">Locações Ativas</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon">🏁</div>
-            <div class="stat-value">{{ estatisticas.locacoesFinalizadas }}</div>
-            <div class="stat-label">Finalizadas</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon">💰</div>
-            <div class="stat-value">{{ formatarValor(estatisticas.valorTotalGasto) }}</div>
-            <div class="stat-label">Total Gasto</div>
-          </div>
-        </div>
-
-        <div *ngIf="!loadingEstatisticas && !estatisticas" class="no-data">
-          <p>Nenhuma estatística disponível</p>
-        </div>
-      </div>
-
-      <!-- Seção de Histórico -->
-      <div class="section">
-        <div class="section-header">
-          <h2 class="section-title">📋 Histórico de Locações</h2>
-          <button class="btn-toggle-historico" (click)="loadHistoricoLocacoes()">
-            {{ mostrarHistorico ? '▼ Ocultar' : '▶ Ver Histórico' }}
-          </button>
-        </div>
-
-        <div *ngIf="loadingLocacoes" class="no-data">
-          <p>Carregando histórico...</p>
-        </div>
-
-        <div *ngIf="mostrarHistorico && !loadingLocacoes && locacoes.length > 0" class="historico-lista">
-          <div *ngFor="let locacao of locacoes" class="locacao-card">
-            <div class="locacao-header">
-              <h3 class="locacao-veiculo">{{ locacao.veiculoNome }}</h3>
-              <span class="locacao-status" [ngClass]="getStatusClass(locacao.status)">
-                {{ locacao.status }}
-              </span>
-            </div>
-
-            <div class="locacao-detalhes">
-              <div class="locacao-info">
-                <span class="info-icon">📅</span>
-                <span class="info-text">
-                  {{ formatarData(locacao.dataInicio) }} até {{ formatarData(locacao.dataFim) }}
-                </span>
-              </div>
-
-              <div class="locacao-info">
-                <span class="info-icon">💵</span>
-                <span class="info-text valor-destaque">
-                  {{ formatarValor(locacao.valorTotal) }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div *ngIf="mostrarHistorico && !loadingLocacoes && locacoes.length === 0" class="no-data">
-          <p>Você ainda não possui locações</p>
-        </div>
-      </div>
-
-      <!-- ========== FIM DAS NOVAS SEÇÕES ========== -->
-
-    </div><!-- .perfil-content -->
-
-    <!-- Actions -->
-    <div class="perfil-actions">
-      <button class="btn-secondary" (click)="goToHome()">
-        Voltar para Home
-      </button>
-      <button class="btn-danger" (click)="logout()">
-        Sair da Conta
-      </button>
-    </div>
-  </div><!-- .perfil-card -->
-</div><!-- .perfil-container -->
+  <!-- Error State -->
+  <div *ngIf="!loading && errorMessage && !user" class="error-page">
+    <div class="error-icon">⚠️</div>
+    <h2>Erro ao carregar perfil</h2>
+    <p>{{ errorMessage }}</p>
+    <button class="btn-primary-custom" (click)="goToHome()">Voltar para Home</button>
+  </div>
+</div>

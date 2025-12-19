@@ -1,0 +1,209 @@
+<div class="detalhes-container">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-content">
+      <div class="logo" (click)="goToHome()">
+        <h1>🚗 LocadoraMax</h1>
+      </div>
+
+      <div class="nav-links">
+        <a (click)="goToHome()" style="cursor: pointer;">Home</a>
+        <a (click)="goToVeiculos()" style="cursor: pointer;">Veículos</a>
+        
+        <div *ngIf="isAuthenticated">
+          <span class="user-name-link" (click)="goToPerfil()">
+            Olá, {{ firstName }}
+          </span>
+          <button class="btn-secondary" (click)="logout()">Sair</button>
+        </div>
+        
+        <button *ngIf="!isAuthenticated" class="btn-primary" (click)="goToLogin()">
+          Entrar
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Loading -->
+  <div *ngIf="loading && !veiculo" class="loading-container">
+    <div class="spinner"></div>
+    <p>Carregando detalhes...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !veiculo && !loading" class="error-container">
+    <div class="error-message">{{ errorMessage }}</div>
+    <button class="btn-primary" (click)="goToVeiculos()">Voltar para Veículos</button>
+  </div>
+
+  <!-- Detalhes do Veículo -->
+  <section *ngIf="veiculo" class="detalhes-section">
+    <div class="container">
+      <button class="btn-back" (click)="goToVeiculos()">
+        ← Voltar para Veículos
+      </button>
+
+      <div class="detalhes-grid">
+        <!-- Card do Veículo -->
+        <div class="veiculo-card-grande">
+          <div class="badge-categoria">{{ veiculo.categoria }}</div>
+          
+          <div class="veiculo-icon-grande">
+            {{ getIconeCategoria(veiculo.categoria) }}
+          </div>
+          
+          <h1 class="veiculo-titulo">{{ veiculo.marca }} {{ veiculo.modelo }}</h1>
+          <p class="veiculo-ano">Ano: {{ veiculo.ano }}</p>
+          
+          <div class="veiculo-preco-grande">
+            {{ formatarValor(veiculo.valorDiaria) }}<span class="preco-periodo">/dia</span>
+          </div>
+          
+          <div class="veiculo-info">
+            <div class="info-item">
+              <span class="info-label">Placa:</span>
+              <span class="info-value">{{ veiculo.placa }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Categoria:</span>
+              <span class="info-value">{{ veiculo.categoria }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Status:</span>
+              <span class="info-value" [class.disponivel]="veiculo.disponivel" [class.indisponivel]="!veiculo.disponivel">
+                {{ veiculo.disponivel ? 'Disponível' : 'Indisponível' }}
+              </span>
+            </div>
+          </div>
+
+          <p class="veiculo-descricao" *ngIf="veiculo.descricao">
+            {{ veiculo.descricao }}
+          </p>
+        </div>
+
+        <!-- Formulário de Locação - SÓ APARECE NO MODO ALUGAR -->
+        <div class="locacao-card" *ngIf="modoAlugar">
+          <h2 class="locacao-titulo">Reserve Agora</h2>
+          
+          <!-- Mensagens -->
+          <div *ngIf="successMessage" class="success-message">
+            ✓ {{ successMessage }}
+          </div>
+          
+          <div *ngIf="errorMessage && veiculo" class="error-message-form">
+            ✗ {{ errorMessage }}
+          </div>
+
+          <form class="locacao-form" (ngSubmit)="alugarVeiculo()">
+            <!-- Data de Retirada -->
+            <div class="form-group">
+              <label for="dataRetirada">Data de Retirada *</label>
+              <input
+                type="date"
+                id="dataRetirada"
+                [(ngModel)]="dataRetirada"
+                name="dataRetirada"
+                [min]="dataMinima"
+                (change)="calcularValor()"
+                required
+                class="form-input"
+                [disabled]="loading || !veiculo.disponivel"
+              >
+            </div>
+
+            <!-- Data de Devolução -->
+            <div class="form-group">
+              <label for="dataDevolucao">Data de Devolução *</label>
+              <input
+                type="date"
+                id="dataDevolucao"
+                [(ngModel)]="dataDevolucao"
+                name="dataDevolucao"
+                [min]="dataRetirada || dataMinima"
+                (change)="calcularValor()"
+                required
+                class="form-input"
+                [disabled]="loading || !veiculo.disponivel"
+              >
+            </div>
+
+            <!-- Observações -->
+            <div class="form-group">
+              <label for="observacoes">Observações (opcional)</label>
+              <textarea
+                id="observacoes"
+                [(ngModel)]="observacoes"
+                name="observacoes"
+                rows="3"
+                placeholder="Ex: Viagem para praia, preciso de GPS..."
+                class="form-textarea"
+                [disabled]="loading || !veiculo.disponivel"
+              ></textarea>
+            </div>
+
+            <!-- Resumo do Valor -->
+            <div *ngIf="valorTotal > 0" class="resumo-valor">
+              <div class="resumo-item">
+                <span>Período:</span>
+                <strong>{{ diasLocacao }} {{ diasLocacao === 1 ? 'dia' : 'dias' }}</strong>
+              </div>
+              <div class="resumo-item">
+                <span>Valor por dia:</span>
+                <strong>{{ formatarValor(veiculo.valorDiaria) }}</strong>
+              </div>
+              <div class="resumo-total">
+                <span>Valor Total:</span>
+                <strong>{{ formatarValor(valorTotal) }}</strong>
+              </div>
+            </div>
+
+            <!-- Botão de Ação -->
+            <button
+              type="submit"
+              class="btn-alugar"
+              [disabled]="loading || !veiculo.disponivel || !dataRetirada || !dataDevolucao"
+            >
+              <span *ngIf="!loading">
+                {{ isAuthenticated ? 'Confirmar Locação' : 'Fazer Login para Alugar' }}
+              </span>
+              <span *ngIf="loading">Processando...</span>
+            </button>
+
+            <p class="form-nota" *ngIf="!isAuthenticated">
+              * Você precisa estar logado para realizar uma locação
+            </p>
+            <p class="form-nota" *ngIf="!veiculo.disponivel">
+              * Este veículo está temporariamente indisponível
+            </p>
+          </form>
+        </div>
+
+        <!-- Botão para Alugar - APARECE APENAS NO MODO DETALHES -->
+        <div class="action-card" *ngIf="!modoAlugar && veiculo">
+          <h2 class="action-titulo">Gostou deste veículo?</h2>
+          <p class="action-subtitulo">Reserve agora e garanta sua viagem!</p>
+          
+          <button 
+            class="btn-alugar-grande" 
+            (click)="irParaAlugar()"
+            [disabled]="!veiculo.disponivel"
+          >
+            <span *ngIf="veiculo.disponivel">🚗 Alugar Este Veículo</span>
+            <span *ngIf="!veiculo.disponivel">❌ Veículo Indisponível</span>
+          </button>
+          
+          <p class="form-nota" *ngIf="!isAuthenticated">
+            * Você precisa estar logado para realizar uma locação
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 LocadoraMax. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+</div>

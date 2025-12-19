@@ -1,159 +1,306 @@
-<div class="home-container">
-  <!-- Navbar -->
+<div class="home-wrapper">
+  
+  <!-- ==================== NAVBAR ==================== -->
   <nav class="navbar">
     <div class="nav-content">
-      <div class="logo" style="cursor: pointer;">
-        <h1>🚗 LocadoraMax</h1>
+      <div class="logo" (click)="goToHome()">
+        <span class="logo-icon">🚗</span>
+        <span class="logo-text">LocadoraMax</span>
       </div>
+      
       <div class="nav-links">
-        <a href="#servicos">Serviços</a>
-        <a (click)="goToVeiculos()" style="cursor: pointer;">Veículos</a>
-        <a href="#contato">Contato</a>
-
-        <!-- Se usuário NÃO estiver logado -->
-        <button *ngIf="!isAuthenticated" class="btn-primary" (click)="goToLogin()">Entrar</button>
-
-        <!-- Se usuário estiver logado -->
-        <div *ngIf="isAuthenticated" style="display: flex; gap: 1rem; align-items: center;">
+        <a (click)="scrollToServices()">Serviços</a>
+        <a (click)="goToVeiculos()">Veículos</a>
+        <a (click)="scrollToContact()">Contato</a>
+        
+        <div *ngIf="isAuthenticated" class="nav-user">
           <span class="user-name-link" (click)="goToPerfil()">
             Olá, {{ firstName }}
           </span>
           <button class="btn-secondary" (click)="logout()">Sair</button>
         </div>
-
+        
+        <button *ngIf="!isAuthenticated" class="btn-primary" (click)="goToLogin()">
+          Entrar
+        </button>
       </div>
     </div>
   </nav>
 
-  <!-- Hero Section -->
+  <!-- ==================== HERO SECTION ==================== -->
   <section class="hero">
     <div class="hero-content">
       <h1 class="hero-title">Alugue o Carro Perfeito</h1>
       <p class="hero-subtitle">
-        A maior seleção de veículos para sua viagem.
+        A maior seleção de veículos para sua viagem.<br>
         Preços acessíveis, atendimento de excelência.
       </p>
-      <div class="hero-buttons">
-        <button class="btn-hero-primary" (click)="goToVeiculos()">Começar Agora</button>
-        <button class="btn-hero-secondary" (click)="goToVeiculos()">Ver Veículos</button>
-      </div>
+      <button class="btn-hero-primary" (click)="goToVeiculos()">
+        Ver Todos os Veículos →
+      </button>
     </div>
   </section>
 
-  <!-- Serviços -->
-  <section id="servicos" class="services">
-    <div class="container">
-      <h2 class="section-title">Nossos Serviços</h2>
-      <div class="services-grid">
-        <div class="service-card">
-          <div class="service-icon">🚗</div>
-          <h3>Frota Diversificada</h3>
-          <p>Carros econômicos, SUVs e veículos de luxo</p>
-        </div>
-        <div class="service-card">
-          <div class="service-icon">💰</div>
-          <h3>Melhores Preços</h3>
-          <p>Tarifas competitivas e sem taxas ocultas</p>
-        </div>
-        <div class="service-card">
-          <div class="service-icon">⚡</div>
-          <h3>Processo Rápido</h3>
-          <p>Reserve online em poucos minutos</p>
-        </div>
-        <div class="service-card">
-          <div class="service-icon">🛡️</div>
-          <h3>Seguro Completo</h3>
-          <p>Proteção total para sua tranquilidade</p>
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-content">
+    
+    <!-- SERVIÇOS -->
+    <section id="servicos" class="section-container section-white">
+      <div class="container">
+        <h2 class="section-title">Por que escolher a LocadoraMax?</h2>
+        
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-icon">🚗</div>
+            <div class="service-content">
+              <h3>Frota Diversificada</h3>
+              <p>Carros econômicos, SUVs e veículos de luxo para todas as suas necessidades</p>
+            </div>
+          </div>
+
+          <div class="service-card">
+            <div class="service-icon">💰</div>
+            <div class="service-content">
+              <h3>Melhores Preços</h3>
+              <p>Tarifas competitivas e transparentes, sem taxas ocultas ou surpresas</p>
+            </div>
+          </div>
+
+          <div class="service-card">
+            <div class="service-icon">⚡</div>
+            <div class="service-content">
+              <h3>Processo Rápido</h3>
+              <p>Reserve online em poucos minutos com confirmação instantânea</p>
+            </div>
+          </div>
+
+          <div class="service-card">
+            <div class="service-icon">🛡️</div>
+            <div class="service-content">
+              <h3>Seguro Completo</h3>
+              <p>Proteção total incluída para sua tranquilidade durante a viagem</p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Categorias de Veículos -->
-  <section id="veiculos" class="vehicles">
-    <div class="container">
-      <h2 class="section-title">Categorias de Veículos</h2>
-      <div class="vehicles-grid">
-        <div class="vehicle-card">
-          <div class="vehicle-image">🚙</div>
-          <h3>Econômico</h3>
-          <p class="vehicle-price">A partir de R$ 120/dia</p>
-          <ul class="vehicle-features">
-            <li>✓ Ar condicionado</li>
-            <li>✓ Direção hidráulica</li>
-            <li>✓ 4 portas</li>
-          </ul>
-          <button class="btn-vehicle" (click)="goToVeiculosPorCategoria('Econômico')">
-            Ver Disponíveis
+    <!-- CATEGORIAS DE VEÍCULOS -->
+    <section id="veiculos" class="section-container section-gray">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Categorias de Veículos</h2>
+            <p class="section-subtitle">Escolha a categoria ideal para sua viagem</p>
+          </div>
+          <button class="btn-outline" (click)="goToVeiculos()">
+            Ver Todos →
           </button>
         </div>
         
-        <div class="vehicle-card featured">
-          <div class="badge">Mais Popular</div>
-          <div class="vehicle-image">🚗</div>
-          <h3>SUV</h3>
-          <p class="vehicle-price">A partir de R$ 280/dia</p>
-          <ul class="vehicle-features">
-            <li>✓ Espaço amplo</li>
-            <li>✓ Porta-malas grande</li>
-            <li>✓ 5 lugares</li>
-          </ul>
-          <button class="btn-vehicle featured-btn" (click)="goToVeiculosPorCategoria('SUV')">
-            Ver Disponíveis
-          </button>
+        <div class="vehicles-grid">
+          
+          <!-- Econômico -->
+          <div class="vehicle-card">
+            <div class="vehicle-icon">🚙</div>
+            <div class="vehicle-info">
+              <h3 class="vehicle-name">Econômico</h3>
+              <p class="vehicle-description">Ideal para o dia a dia na cidade</p>
+              <div class="vehicle-price">
+                <span class="price-value">R$ 120</span>
+                <span class="price-period">/dia</span>
+              </div>
+            </div>
+            
+            <div class="vehicle-features">
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Ar condicionado</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Direção hidráulica</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>4 portas</span>
+              </div>
+            </div>
+            
+            <button class="btn-vehicle" (click)="goToVeiculosPorCategoria('Econômico')">
+              Ver Disponíveis
+            </button>
+          </div>
+
+          <!-- SUV - Destaque -->
+          <div class="vehicle-card vehicle-featured">
+            <div class="featured-badge">
+              <span class="badge-icon">⭐</span>
+              <span>Mais Popular</span>
+            </div>
+            
+            <div class="vehicle-icon">🚗</div>
+            <div class="vehicle-info">
+              <h3 class="vehicle-name">SUV</h3>
+              <p class="vehicle-description">Perfeito para viagens em família</p>
+              <div class="vehicle-price">
+                <span class="price-value">R$ 280</span>
+                <span class="price-period">/dia</span>
+              </div>
+            </div>
+            
+            <div class="vehicle-features">
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Espaço amplo</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Porta-malas grande</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>5 lugares confortáveis</span>
+              </div>
+            </div>
+            
+            <button class="btn-vehicle btn-vehicle-featured" (click)="goToVeiculosPorCategoria('SUV')">
+              Ver Disponíveis
+            </button>
+          </div>
+
+          <!-- Luxo -->
+          <div class="vehicle-card">
+            <div class="vehicle-icon">🏎️</div>
+            <div class="vehicle-info">
+              <h3 class="vehicle-name">Luxo</h3>
+              <p class="vehicle-description">Experiência premium garantida</p>
+              <div class="vehicle-price">
+                <span class="price-value">R$ 450</span>
+                <span class="price-period">/dia</span>
+              </div>
+            </div>
+            
+            <div class="vehicle-features">
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Tecnologia premium</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Interior sofisticado</span>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Alto desempenho</span>
+              </div>
+            </div>
+            
+            <button class="btn-vehicle" (click)="goToVeiculosPorCategoria('Luxo')">
+              Ver Disponíveis
+            </button>
+          </div>
+          
         </div>
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section class="section-container section-white">
+      <div class="container">
+        <h2 class="section-title">Como Funciona</h2>
         
-        <div class="vehicle-card">
-          <div class="vehicle-image">🏎️</div>
-          <h3>Luxo</h3>
-          <p class="vehicle-price">A partir de R$ 450/dia</p>
-          <ul class="vehicle-features">
-            <li>✓ Tecnologia premium</li>
-            <li>✓ Interior sofisticado</li>
-            <li>✓ Alto desempenho</li>
-          </ul>
-          <button class="btn-vehicle" (click)="goToVeiculosPorCategoria('Luxo')">
-            Ver Disponíveis
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h3>Escolha o Veículo</h3>
+              <p>Navegue pela nossa frota e selecione o carro ideal para você</p>
+            </div>
+          </div>
 
-  <!-- Contato -->
-  <section id="contato" class="contact">
-    <div class="container">
-      <h2 class="section-title">Entre em Contato</h2>
-      <div class="contact-info">
-        <div class="contact-item">
-          <div class="contact-icon">📞</div>
-          <div>
-            <h3>Telefone</h3>
-            <p>(11) 9999-9999</p>
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h3>Reserve Online</h3>
+              <p>Preencha as datas e confirme sua reserva em minutos</p>
+            </div>
           </div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">📧</div>
-          <div>
-            <h3>Email</h3>
-            <p>contato@locadoramax.com</p>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">📍</div>
-          <div>
-            <h3>Endereço</h3>
-            <p>Av. Paulista, 1578 - São Paulo/SP</p>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h3>Retire e Aproveite</h3>
+              <p>Retire o veículo na data escolhida e aproveite sua viagem</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Footer -->
+    <!-- CONTATO -->
+    <section id="contato" class="section-container section-gray">
+      <div class="container">
+        <h2 class="section-title">Entre em Contato</h2>
+        <p class="section-subtitle">Estamos prontos para ajudar você</p>
+        
+        <div class="contact-grid">
+          <div class="contact-card">
+            <div class="contact-icon-wrapper">
+              <span class="contact-icon">📞</span>
+            </div>
+            <div class="contact-details">
+              <h3>Telefone</h3>
+              <p>(11) 9999-9999</p>
+              <small>Seg - Sex: 8h às 18h</small>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon-wrapper">
+              <span class="contact-icon">📧</span>
+            </div>
+            <div class="contact-details">
+              <h3>Email</h3>
+              <p>contato@locadoramax.com</p>
+              <small>Resposta em até 24h</small>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-icon-wrapper">
+              <span class="contact-icon">📍</span>
+            </div>
+            <div class="contact-details">
+              <h3>Endereço</h3>
+              <p>Av. Paulista, 1578</p>
+              <small>São Paulo - SP</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
   <footer class="footer">
     <div class="container">
-      <p>&copy; 2025 LocadoraMax. Todos os direitos reservados.</p>
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3>🚗 LocadoraMax</h3>
+          <p>A melhor escolha para suas viagens</p>
+        </div>
+        <div class="footer-links">
+          <a (click)="scrollToServices()">Serviços</a>
+          <a (click)="goToVeiculos()">Veículos</a>
+          <a (click)="scrollToContact()">Contato</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 LocadoraMax. Todos os direitos reservados.</p>
+      </div>
     </div>
   </footer>
+
 </div>

@@ -3,8 +3,9 @@ import { Injectable } from '@angular/core';
 import { Jwt } from './jwt';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { AuthResponse, EstatisticasDTO, LocacaoDTO, LoginRequest, RegisterRequest } from '../dto/auth.dto';
+import { AuthResponse, EstatisticasDTO, LoginRequest, RegisterRequest } from '../dto/auth.dto';
 import { Usuario, UsuarioPerfil } from '../models/user.model';
+import { LocacaoDTO } from './locacao';  // ✅ IMPORT CORRETO
 
 @Injectable({
   providedIn: 'root',

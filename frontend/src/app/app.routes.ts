@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Routes } from '@angular/router';
+import { VeiculoDetalhesComponent } from './components/veiculo-detalhes/veiculo-detalhes';
 
 export const routes: Routes = [
     {
@@ -27,11 +28,7 @@ export const routes: Routes = [
         path: 'veiculos',
         loadComponent: () => import('./components/pesquisa-veiculos/pesquisa-veiculos').then(m => m.PesquisaVeiculosComponent)
     },
-    // {
-    //     path: 'veiculo/:id',
-    //     loadComponent: () => import('./components/pesquisa-veiculos/pesquisa-veiculos').then(m => m.DetalhesVeiculoComponent)
-    //     // TODO: Criar este componente depois
-    // },
+    { path: 'veiculo/:id', component: VeiculoDetalhesComponent },
     {
         path: '**',
         redirectTo: '/home'

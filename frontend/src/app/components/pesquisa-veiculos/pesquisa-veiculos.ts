@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CategoriaVeiculo, VeiculoDTO } from '../../dto/veiculo.dto';
 import { Auth } from '../../services/auth';
 import { VeiculoService } from '../../services/veiculo';
@@ -19,18 +20,21 @@ export class PesquisaVeiculosComponent implements OnInit {
 
   veiculos: VeiculoDTO[] = [];
   veiculosFiltrados: VeiculoDTO[] = [];
-  loading = true;
+  loading = false;
   errorMessage = '';
 
   categorias: CategoriaVeiculo[] = ['Econômico', 'Intermediário', 'SUV', 'Luxo', 'Esportivo'];
   categoriaSelecionada: string = 'Todos';
   termoPesquisa: string = '';
 
+  private destroyRef = takeUntilDestroyed();
+
   constructor(
     private veiculoService: VeiculoService,
     private authService: Auth,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -62,17 +66,20 @@ export class PesquisaVeiculosComponent implements OnInit {
   loadVeiculos(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.cdr.markForCheck();
 
     this.veiculoService.getVeiculosDisponiveis().subscribe({
       next: (data) => {
-        this.veiculos = data;
-        this.veiculosFiltrados = data;
+        this.veiculos = data || [];
+        this.veiculosFiltrados = data || [];
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Erro ao carregar veículos:', error);
         this.errorMessage = 'Erro ao carregar veículos. Tente novamente.';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -83,6 +90,7 @@ export class PesquisaVeiculosComponent implements OnInit {
   filtrarPorCategoria(categoria: string): void {
     this.categoriaSelecionada = categoria;
     this.aplicarFiltros();
+    this.atualizarURL();
   }
 
   /**
@@ -117,12 +125,40 @@ export class PesquisaVeiculosComponent implements OnInit {
   }
 
   /**
+   * Atualiza a URL com os filtros ativos
+   */
+  private atualizarURL(): void {
+    if (this.categoriaSelecionada === 'Todos') {
+      // Remove query params quando seleciona "Todos"
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {},
+        replaceUrl: true
+      });
+    } else {
+      // Adiciona query param da categoria sem adicionar ao histórico
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { categoria: this.categoriaSelecionada },
+        replaceUrl: true
+      });
+    }
+  }
+
+  /**
    * Limpa todos os filtros
    */
   limparFiltros(): void {
     this.categoriaSelecionada = 'Todos';
     this.termoPesquisa = '';
     this.veiculosFiltrados = [...this.veiculos];
+    
+    // Remove query params da URL
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true
+    });
   }
 
   /**
@@ -154,16 +190,19 @@ export class PesquisaVeiculosComponent implements OnInit {
    * Se não autenticado, redireciona para login
    * Se autenticado, vai para o perfil do carro
    */
-  alugarVeiculo(veiculoId: number): void {
-    if (!this.isAuthenticated) {
-      // Salva ID do veículo para redirecionar após login
-      localStorage.setItem('veiculoIntencao', veiculoId.toString());
-      this.router.navigate(['/login']);
-    } else {
-      // TODO: Redirecionar para perfil do carro (será implementado)
-      this.router.navigate(['/veiculo', veiculoId]);
-    }
+alugarVeiculo(veiculoId: number): void {
+  if (!this.isAuthenticated) {
+    // Salva ID do veículo para redirecionar após login
+    localStorage.setItem('veiculoIntencao', veiculoId.toString());
+    this.router.navigate(['/login']);
+  } else {
+    // ADICIONE O queryParams AQUI
+    this.router.navigate(['/veiculo', veiculoId], { 
+      queryParams: { alugar: 'true' } 
+    });
   }
+}
+
 
   /**
    * Navega para detalhes do veículo
