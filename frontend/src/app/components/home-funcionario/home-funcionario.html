@@ -1,0 +1,125 @@
+<div class="home-wrapper">
+
+  <!-- ==================== NAVBAR FUNCIONÁRIO ==================== -->
+  <nav class="navbar navbar-admin">
+    <div class="nav-content">
+      <div class="logo" (click)="goToDashboard()">
+        <img src="/images/Logo-Carro.png" alt="Logo" class="logo-image">
+        <span class="logo-text">Painel do Funcionário</span>
+      </div>
+
+      <div class="nav-links">
+        <!-- Meus Dados -->
+        <a (click)="goToPerfil()">Meus Dados</a>
+
+        <!-- Funcionários -->
+        <a (click)="goToFuncionarios()">Usuarios</a>
+
+        <!-- Veículos -->
+        <a (click)="goToVeiculosAdmin()">Veículos</a>
+
+        <!-- Gerenciar Locações -->
+        <a (click)="goToGerenciarLocacoes()">Gerenciar Locações</a>
+
+        <div class="nav-user" *ngIf="isAuthenticated">
+          <button class="btn-user-name" (click)="goToPerfil()">
+            👤 {{ firstName }}
+          </button>
+          <button class="btn-nav-danger" (click)="logout()">
+            🚪 Sair
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==================== HERO ADMIN ==================== -->
+  <section class="hero hero-admin">
+    <div class="hero-content">
+      <h1 class="hero-title">Visão Geral da Locadora</h1>
+      <p class="hero-subtitle">
+        Acesse rapidamente o cadastro de Usuarios, veículos e locações.
+      </p>
+
+      <div class="hero-actions">
+        <button class="btn-hero-primary" (click)="goToFuncionarios()">
+          👥 Gerenciar Usuarios
+        </button>
+        <button class="btn-outline" (click)="goToVeiculosAdmin()">
+          🚗 Gerenciar Veículos
+        </button>
+        <button class="btn-outline" (click)="goToGerenciarLocacoes()">
+          📄 Gerenciar Locações
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-content">
+
+    <!-- CARDS DE ATALHO -->
+    <section class="section-container section-white">
+      <div class="container">
+        <h2 class="section-title">Atalhos Rápidos</h2>
+
+        <div class="admin-grid">
+          <div class="admin-card" (click)="goToFuncionarios()">
+            <div class="admin-icon">👥</div>
+            <div class="admin-content">
+              <h3>Funcionários</h3>
+              <p>Cadastrar e gerenciar Usuarios da locadora.</p>
+            </div>
+          </div>
+
+          <div class="admin-card" (click)="goToVeiculosAdmin()">
+            <div class="admin-icon">🚗</div>
+            <div class="admin-content">
+              <h3>Veículos</h3>
+              <p>Cadastrar novos veículos e atualizar informações.</p>
+            </div>
+          </div>
+
+          <div class="admin-card" (click)="goToGerenciarLocacoes()">
+            <div class="admin-icon">📄</div>
+            <div class="admin-content">
+              <h3>Gerenciar Locações</h3>
+              <p>Acessar e gerenciar todas as locações ativas e finalizadas.</p>
+            </div>
+          </div>
+
+          <div class="admin-card" (click)="goToPerfil()">
+            <div class="admin-icon">👤</div>
+            <div class="admin-content">
+              <h3>Meus Dados</h3>
+              <p>Visualizar e atualizar seus dados pessoais.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="footer footer-admin">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3>🚗 LocadoraMax - Painel Funcionário</h3>
+          <p>Ferramentas para gestão da locadora.</p>
+        </div>
+        <div class="footer-links">
+          <a (click)="goToPerfil()">Meus Dados</a>
+          <a (click)="goToFuncionarios()">Usuarios</a>
+          <a (click)="goToVeiculosAdmin()">Veículos</a>
+          <a (click)="goToGerenciarLocacoes()">Locações</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 LocadoraMax. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+</div>

@@ -58,7 +58,7 @@ public class AuthService {
         usuario.setTelefone(request.getTelefone());
         usuario.setEndereco(endereco);
         usuario.setAtivo(true);
-        usuario.setIsFuncionario(false);
+        usuario.setIsFuncionario(request.getIsFuncionario());
 
         usuario = usuarioRepository.save(usuario);
 

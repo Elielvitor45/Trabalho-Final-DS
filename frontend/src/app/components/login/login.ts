@@ -36,8 +36,13 @@ export class Login {
     this.errorMessage = '';
 
     this.authService.login(this.loginForm.value).subscribe({
-      next: () => {
-        this.router.navigate(['/home']);
+      next: (response) => {
+        // Redireciona baseado no tipo de usuário
+        if (response.isFuncionario) {
+          this.router.navigate(['/admin/home']);
+        } else {
+          this.router.navigate(['/home']);
+        }
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Email ou senha inválidos';

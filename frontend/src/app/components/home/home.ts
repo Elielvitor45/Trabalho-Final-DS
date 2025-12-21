@@ -71,8 +71,8 @@ export class Home implements OnInit, OnDestroy {
    * Navega para pesquisa com filtro de categoria
    */
   goToVeiculosPorCategoria(categoria: string): void {
-    this.router.navigate(['/veiculos'], { 
-      queryParams: { categoria: categoria } 
+    this.router.navigate(['/veiculos'], {
+      queryParams: { categoria: categoria }
     });
   }
 
@@ -82,8 +82,8 @@ export class Home implements OnInit, OnDestroy {
   scrollToServices(): void {
     const element = document.getElementById('servicos');
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
+      element.scrollIntoView({
+        behavior: 'smooth',
         block: 'start',
         inline: 'nearest'
       });
@@ -96,8 +96,8 @@ export class Home implements OnInit, OnDestroy {
   scrollToContact(): void {
     const element = document.getElementById('contato');
     if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth', 
+      element.scrollIntoView({
+        behavior: 'smooth',
         block: 'start',
         inline: 'nearest'
       });

@@ -75,7 +75,8 @@ export class Auth {
     const userData: Usuario = {
       id: response.id,
       nome: response.nome,
-      email: response.email
+      email: response.email,
+      isFuncionario: response.isFuncionario
     };
     localStorage.setItem('currentUser', JSON.stringify(userData));
     this.currentUserSubject.next(userData);

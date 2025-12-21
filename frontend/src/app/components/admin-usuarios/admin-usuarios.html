@@ -1,0 +1,498 @@
+<div class="admin-usuarios-wrapper">
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar navbar-admin">
+    <div class="nav-content">
+      <div class="logo" (click)="goToAdminHome()">
+        <img src="/images/Logo-Carro.png" alt="Logo" class="logo-image">
+        <span class="logo-text">Painel do Funcionário</span>
+      </div>
+
+      <div class="nav-links">
+        <a (click)="goToAdminHome()">Dashboard</a>
+        <a class="active">Usuários</a>
+        <a (click)="goToVeiculosAdmin()">Veículos</a>
+        <a (click)="goToGerenciarLocacoes()">Locações</a>
+
+        <div class="nav-user">
+          <button class="btn-user-name" (click)="goToPerfil()">
+            👤 {{ firstName }}
+          </button>
+          <button class="btn-nav-danger" (click)="logout()">
+            🚪 Sair
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==================== BREADCRUMB ==================== -->
+  <div class="breadcrumb-container">
+    <div class="container">
+      <div class="breadcrumb">
+        <span (click)="goToAdminHome()" class="breadcrumb-link">Dashboard</span>
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-current">Gerenciar Usuários</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-content">
+    <div class="container">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Gerenciar Usuários</h1>
+          <p class="page-subtitle">Visualize e gerencie todos os usuários cadastrados no sistema</p>
+        </div>
+        <button class="btn-primary" (click)="abrirModalCriar()">
+          ➕ Novo Funcionário
+        </button>
+      </div>
+
+      <!-- FILTROS E BUSCA -->
+      <div class="filters-card">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Buscar por nome, email ou CPF..."
+            [(ngModel)]="searchTerm"
+            (input)="filtrarUsuarios()"
+            class="search-input"
+          >
+        </div>
+
+        <div class="filter-buttons">
+          <button
+            [class.active]="filtroAtivo === 'todos'"
+            (click)="filtrarPorTipo('todos')"
+            class="filter-btn"
+          >
+            Todos ({{ totalUsuarios }})
+          </button>
+          <button
+            [class.active]="filtroAtivo === 'clientes'"
+            (click)="filtrarPorTipo('clientes')"
+            class="filter-btn"
+          >
+            Clientes ({{ totalClientes }})
+          </button>
+          <button
+            [class.active]="filtroAtivo === 'funcionarios'"
+            (click)="filtrarPorTipo('funcionarios')"
+            class="filter-btn"
+          >
+            Funcionários ({{ totalFuncionarios }})
+          </button>
+          <button
+            [class.active]="filtroAtivo === 'inativos'"
+            (click)="filtrarPorTipo('inativos')"
+            class="filter-btn"
+          >
+            Inativos ({{ totalInativos }})
+          </button>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Carregando usuários...</p>
+      </div>
+
+      <!-- TABELA DE USUÁRIOS -->
+      <div *ngIf="!loading && usuariosFiltrados.length > 0" class="table-card">
+        <div class="table-responsive">
+          <table class="usuarios-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>CPF</th>
+                <th>Telefone</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th class="text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let usuario of usuariosFiltrados" [class.inactive-row]="!usuario.ativo">
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar">{{ getInitials(usuario.nome) }}</div>
+                    <span class="user-name">{{ usuario.nome }}</span>
+                  </div>
+                </td>
+                <td>{{ usuario.email }}</td>
+                <td>{{ formatarCPF(usuario.cpf) }}</td>
+                <td>{{ usuario.telefone || '-' }}</td>
+                <td>
+                  <span
+                    class="badge"
+                    [class.badge-warning]="usuario.isFuncionario"
+                    [class.badge-primary]="!usuario.isFuncionario"
+                  >
+                    {{ usuario.isFuncionario ? 'Funcionário' : 'Cliente' }}
+                  </span>
+                </td>
+                <td>
+                  <span
+                    class="badge"
+                    [class.badge-success]="usuario.ativo"
+                    [class.badge-danger]="!usuario.ativo"
+                  >
+                    {{ usuario.ativo ? 'Ativo' : 'Inativo' }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="action-buttons">
+                    <button
+                      class="btn-icon btn-view"
+                      (click)="visualizarUsuario(usuario)"
+                      title="Visualizar detalhes"
+                    >
+                      👁️
+                    </button>
+                    <button
+                      *ngIf="usuario.ativo"
+                      class="btn-icon btn-danger"
+                      (click)="confirmarDesativar(usuario)"
+                      title="Desativar usuário"
+                    >
+                      🚫
+                    </button>
+                    <button
+                      *ngIf="!usuario.ativo"
+                      class="btn-icon btn-activate"
+                      (click)="confirmarAtivar(usuario)"
+                      title="Ativar usuário"
+                    >
+                      ✓
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VAZIO -->
+      <div *ngIf="!loading && usuariosFiltrados.length === 0" class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h3>Nenhum usuário encontrado</h3>
+        <p>Não há usuários cadastrados com os filtros selecionados.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ==================== MODAL EDITAR USUÁRIO ==================== -->
+  <div *ngIf="modalDetalhesAberto" class="modal-overlay" (click)="fecharModalDetalhes()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ modoEdicao ? 'Editar Usuário' : 'Detalhes do Usuário' }}</h2>
+        <button class="btn-close" (click)="fecharModalDetalhes()">✕</button>
+      </div>
+
+      <form [formGroup]="editForm" (ngSubmit)="salvarAlteracoes()">
+        <div class="modal-body" *ngIf="usuarioSelecionado">
+          
+          <!-- MODO VISUALIZAÇÃO -->
+          <div *ngIf="!modoEdicao">
+            <div class="detail-section">
+              <h3>Informações Pessoais</h3>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <label>Nome Completo</label>
+                  <p>{{ usuarioSelecionado.nome }}</p>
+                </div>
+                <div class="detail-item">
+                  <label>Email</label>
+                  <p>{{ usuarioSelecionado.email }}</p>
+                </div>
+                <div class="detail-item">
+                  <label>CPF</label>
+                  <p>{{ formatarCPF(usuarioSelecionado.cpf) }}</p>
+                </div>
+                <div class="detail-item">
+                  <label>Telefone</label>
+                  <p>{{ usuarioSelecionado.telefone || '-' }}</p>
+                </div>
+                <div class="detail-item">
+                  <label>Tipo de Usuário</label>
+                  <p>
+                    <span
+                      class="badge"
+                      [class.badge-warning]="usuarioSelecionado.isFuncionario"
+                      [class.badge-primary]="!usuarioSelecionado.isFuncionario"
+                    >
+                      {{ usuarioSelecionado.isFuncionario ? 'Funcionário' : 'Cliente' }}
+                    </span>
+                  </p>
+                </div>
+                <div class="detail-item">
+                  <label>Status</label>
+                  <p>
+                    <span
+                      class="badge"
+                      [class.badge-success]="usuarioSelecionado.ativo"
+                      [class.badge-danger]="!usuarioSelecionado.ativo"
+                    >
+                      {{ usuarioSelecionado.ativo ? 'Ativo' : 'Inativo' }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-section" *ngIf="usuarioSelecionado.endereco">
+              <h3>Endereço</h3>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <label>CEP</label>
+                  <p>{{ usuarioSelecionado.endereco.cep }}</p>
+                </div>
+                <div class="detail-item">
+                  <label>Logradouro</label>
+                  <p>{{ usuarioSelecionado.endereco.logradouro }}, {{ usuarioSelecionado.endereco.numero }}</p>
+                </div>
+                <div class="detail-item">
+                  <label>Complemento</label>
+                  <p>{{ usuarioSelecionado.endereco.complemento || '-' }}</p>
+                </div>
+                <div class="detail-item">
+                  <label>Bairro</label>
+                  <p>{{ usuarioSelecionado.endereco.bairro }}</p>
+                </div>
+                <div class="detail-item">
+                  <label>Cidade</label>
+                  <p>{{ usuarioSelecionado.endereco.cidade }} - {{ usuarioSelecionado.endereco.estado }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MODO EDIÇÃO -->
+          <div *ngIf="modoEdicao">
+            <div class="detail-section">
+              <h3>Informações Pessoais</h3>
+              <div class="form-edit-grid">
+                <div class="form-group-edit">
+                  <label>Nome Completo *</label>
+                  <input type="text" formControlName="nome" class="input-edit">
+                  <span class="error-text" *ngIf="editForm.get('nome')?.invalid && editForm.get('nome')?.touched">
+                    Nome é obrigatório
+                  </span>
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Email *</label>
+                  <input type="email" formControlName="email" class="input-edit">
+                  <span class="error-text" *ngIf="editForm.get('email')?.invalid && editForm.get('email')?.touched">
+                    Email inválido
+                  </span>
+                </div>
+
+                <div class="form-group-edit">
+                  <label>CPF (não editável)</label>
+                  <input type="text" formControlName="cpf" class="input-edit input-readonly" readonly>
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Telefone</label>
+                  <input type="text" formControlName="telefone" class="input-edit" placeholder="(00) 00000-0000">
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Nova Senha (opcional)</label>
+                  <input type="password" formControlName="senha" class="input-edit" placeholder="Deixe em branco para manter">
+                  <small class="hint-text">Deixe vazio para não alterar a senha</small>
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Tipo de Usuário</label>
+                  <p class="readonly-value">
+                    <span
+                      class="badge"
+                      [class.badge-warning]="usuarioSelecionado.isFuncionario"
+                      [class.badge-primary]="!usuarioSelecionado.isFuncionario"
+                    >
+                      {{ usuarioSelecionado.isFuncionario ? 'Funcionário' : 'Cliente' }}
+                    </span>
+                  </p>
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Status</label>
+                  <p class="readonly-value">
+                    <span
+                      class="badge"
+                      [class.badge-success]="usuarioSelecionado.ativo"
+                      [class.badge-danger]="!usuarioSelecionado.ativo"
+                    >
+                      {{ usuarioSelecionado.ativo ? 'Ativo' : 'Inativo' }}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-section" formGroupName="endereco">
+              <h3>Endereço (Opcional)</h3>
+              <div class="form-edit-grid">
+                <div class="form-group-edit">
+                  <label>CEP</label>
+                  <input type="text" formControlName="cep" class="input-edit" placeholder="00000-000">
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Logradouro</label>
+                  <input type="text" formControlName="logradouro" class="input-edit">
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Número</label>
+                  <input type="text" formControlName="numero" class="input-edit">
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Complemento</label>
+                  <input type="text" formControlName="complemento" class="input-edit">
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Bairro</label>
+                  <input type="text" formControlName="bairro" class="input-edit">
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Cidade</label>
+                  <input type="text" formControlName="cidade" class="input-edit">
+                </div>
+
+                <div class="form-group-edit">
+                  <label>Estado</label>
+                  <select formControlName="estado" class="input-edit">
+                    <option value="">Selecione</option>
+                    <option value="AC">AC</option>
+                    <option value="AL">AL</option>
+                    <option value="AP">AP</option>
+                    <option value="AM">AM</option>
+                    <option value="BA">BA</option>
+                    <option value="CE">CE</option>
+                    <option value="DF">DF</option>
+                    <option value="ES">ES</option>
+                    <option value="GO">GO</option>
+                    <option value="MA">MA</option>
+                    <option value="MT">MT</option>
+                    <option value="MS">MS</option>
+                    <option value="MG">MG</option>
+                    <option value="PA">PA</option>
+                    <option value="PB">PB</option>
+                    <option value="PR">PR</option>
+                    <option value="PE">PE</option>
+                    <option value="PI">PI</option>
+                    <option value="RJ">RJ</option>
+                    <option value="RN">RN</option>
+                    <option value="RS">RS</option>
+                    <option value="RO">RO</option>
+                    <option value="RR">RR</option>
+                    <option value="SC">SC</option>
+                    <option value="SP">SP</option>
+                    <option value="SE">SE</option>
+                    <option value="TO">TO</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <!-- MODO VISUALIZAÇÃO -->
+          <ng-container *ngIf="!modoEdicao">
+            <button type="button" class="btn-secondary" (click)="fecharModalDetalhes()">Fechar</button>
+            <button type="button" class="btn-edit" (click)="ativarModoEdicao()">✏️ Editar</button>
+            <button
+              type="button"
+              *ngIf="usuarioSelecionado?.ativo"
+              class="btn-danger"
+              (click)="confirmarDesativar(usuarioSelecionado)"
+            >
+              Desativar
+            </button>
+            <button
+              type="button"
+              *ngIf="!usuarioSelecionado?.ativo"
+              class="btn-success"
+              (click)="confirmarAtivar(usuarioSelecionado)"
+            >
+              Ativar
+            </button>
+          </ng-container>
+
+          <!-- MODO EDIÇÃO -->
+          <ng-container *ngIf="modoEdicao">
+            <button type="button" class="btn-secondary" (click)="cancelarEdicao()" [disabled]="salvando">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-primary-modal" [disabled]="editForm.invalid || salvando">
+              {{ salvando ? 'Salvando...' : '💾 Salvar Alterações' }}
+            </button>
+          </ng-container>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ==================== MODAL CONFIRMAR DESATIVAR ==================== -->
+  <div *ngIf="modalConfirmarDesativarAberto" class="modal-overlay" (click)="fecharModalConfirmarDesativar()">
+    <div class="modal-content modal-small" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirmar Desativação</h2>
+        <button class="btn-close" (click)="fecharModalConfirmarDesativar()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p>Tem certeza que deseja desativar o usuário <strong>{{ usuarioParaDesativar?.nome }}</strong>?</p>
+        <p class="warning-text">⚠️ Usuários inativos não poderão fazer login no sistema.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="fecharModalConfirmarDesativar()">Cancelar</button>
+        <button class="btn-danger" (click)="desativarUsuario()" [disabled]="desativando">
+          {{ desativando ? 'Desativando...' : 'Desativar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL CONFIRMAR ATIVAR ==================== -->
+  <div *ngIf="modalConfirmarAtivarAberto" class="modal-overlay" (click)="fecharModalConfirmarAtivar()">
+    <div class="modal-content modal-small" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirmar Ativação</h2>
+        <button class="btn-close" (click)="fecharModalConfirmarAtivar()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p>Tem certeza que deseja ativar o usuário <strong>{{ usuarioParaAtivar?.nome }}</strong>?</p>
+        <p class="success-text">✓ Usuários ativos poderão fazer login no sistema.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="fecharModalConfirmarAtivar()">Cancelar</button>
+        <button class="btn-success" (click)="ativarUsuario()" [disabled]="ativando">
+          {{ ativando ? 'Ativando...' : 'Ativar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

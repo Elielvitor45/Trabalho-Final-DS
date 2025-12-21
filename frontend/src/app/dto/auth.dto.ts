@@ -26,6 +26,7 @@ export interface AuthResponse {
   id: number;
   nome: string;
   email: string;
+  isFuncionario: boolean;
   expiresIn: number;
 }
 

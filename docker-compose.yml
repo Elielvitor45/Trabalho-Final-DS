@@ -22,7 +22,6 @@ services:
       retries: 5
       start_period: 30s
 
-  # Spring Boot Backend
   spring-backend:
     build:
       context: .
@@ -33,7 +32,6 @@ services:
       mysql-db:
         condition: service_healthy
     environment:
-      # Spring Boot properties padrão
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/locadora_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: locadora_user
       SPRING_DATASOURCE_PASSWORD: 1234
@@ -41,7 +39,6 @@ services:
       SPRING_JPA_SHOW_SQL: "true"
       SPRING_PROFILES_ACTIVE: dev
       
-      # JWT properties (mínimo 256 bits = 32 caracteres)
       JWT_SECRET: locadora-secret-key-super-segura-com-256-bits-minimo-para-hs256-funcionar
       JWT_EXPIRATION: 86400000
     ports:

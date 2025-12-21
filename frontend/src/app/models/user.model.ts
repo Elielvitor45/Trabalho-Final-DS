@@ -2,10 +2,12 @@ export interface Usuario {
   id: number;
   nome: string;
   email: string;
+  isFuncionario: boolean;
 }
 
 export interface UsuarioPerfil {
   id: number;
+  isFuncionario: boolean;
   nome: string;
   cpf: string;
   email: string;

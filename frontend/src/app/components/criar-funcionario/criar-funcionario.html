@@ -1,0 +1,307 @@
+<div class="criar-funcionario-wrapper">
+
+  <!-- ==================== NAVBAR ==================== -->
+  <nav class="navbar navbar-admin">
+    <div class="nav-content">
+      <div class="logo" (click)="goToAdminHome()">
+        <img src="/images/Logo-Carro.png" alt="Logo" class="logo-image">
+        <span class="logo-text">Painel do Funcionário</span>
+      </div>
+
+      <div class="nav-links">
+        <a (click)="goToAdminHome()">Dashboard</a>
+        <a (click)="goToUsuarios()" class="active">Usuários</a>
+        <a (click)="goToVeiculosAdmin()">Veículos</a>
+        <a (click)="goToGerenciarLocacoes()">Locações</a>
+
+        <div class="nav-user">
+          <button class="btn-user-name" (click)="goToPerfil()">
+            👤 {{ firstName }}
+          </button>
+          <button class="btn-nav-danger" (click)="logout()">
+            🚪 Sair
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==================== BREADCRUMB ==================== -->
+  <div class="breadcrumb-container">
+    <div class="container">
+      <div class="breadcrumb">
+        <span (click)="goToAdminHome()" class="breadcrumb-link">Dashboard</span>
+        <span class="breadcrumb-separator">›</span>
+        <span (click)="goToUsuarios()" class="breadcrumb-link">Usuários</span>
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-current">Novo Usuario</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="main-content">
+    <div class="container">
+
+      <!-- HEADER -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Novo Usuario</h1>
+          <p class="page-subtitle">Preencha os dados para cadastrar um novo Usuario</p>
+        </div>
+      </div>
+
+      <!-- FORMULÁRIO -->
+      <form [formGroup]="funcionarioForm" (ngSubmit)="onSubmit()" class="form-card">
+
+        <!-- DADOS PESSOAIS -->
+        <div class="form-section">
+          <h2 class="section-title">Dados Pessoais</h2>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="nome">Nome Completo *</label>
+              <input
+                type="text"
+                id="nome"
+                formControlName="nome"
+                placeholder="Digite o nome completo"
+                [class.error]="isFieldInvalid('nome')"
+              >
+              <span class="error-message" *ngIf="isFieldInvalid('nome')">
+                Nome é obrigatório
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="cpf">CPF *</label>
+              <input
+                type="text"
+                id="cpf"
+                formControlName="cpf"
+                placeholder="000.000.000-00"
+                maxlength="14"
+                (input)="formatarCPF($event)"
+                [class.error]="isFieldInvalid('cpf')"
+              >
+              <span class="error-message" *ngIf="isFieldInvalid('cpf')">
+                CPF inválido (11 dígitos)
+              </span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                placeholder="email@exemplo.com"
+                [class.error]="isFieldInvalid('email')"
+              >
+              <span class="error-message" *ngIf="isFieldInvalid('email')">
+                Email inválido
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="telefone">Telefone</label>
+              <input
+                type="text"
+                id="telefone"
+                formControlName="telefone"
+                placeholder="(00) 00000-0000"
+                maxlength="15"
+                (input)="formatarTelefone($event)"
+              >
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="senha">Senha *</label>
+              <input
+                type="password"
+                id="senha"
+                formControlName="senha"
+                placeholder="Mínimo 6 caracteres"
+                [class.error]="isFieldInvalid('senha')"
+              >
+              <span class="error-message" *ngIf="isFieldInvalid('senha')">
+                Senha deve ter no mínimo 6 caracteres
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmarSenha">Confirmar Senha *</label>
+              <input
+                type="password"
+                id="confirmarSenha"
+                formControlName="confirmarSenha"
+                placeholder="Digite a senha novamente"
+                [class.error]="isFieldInvalid('confirmarSenha') || senhasNaoCoincidem()"
+              >
+              <span class="error-message" *ngIf="senhasNaoCoincidem()">
+                As senhas não coincidem
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TIPO DE USUÁRIO (NOVO) ==================== -->
+        <div class="form-section">
+          <h2 class="section-title">Tipo de Usuário</h2>
+          
+          <div class="user-type-content">
+            <div class="user-type-badge" [class.badge-funcionario]="isFuncionario" [class.badge-cliente]="!isFuncionario">
+              {{ isFuncionario ? '👨‍💼' : '👤' }} {{ tipoUsuario }}
+            </div>
+
+            <div class="user-type-toggle">
+              <span class="toggle-label-text" [class.active]="!isFuncionario">Cliente</span>
+              <label class="switch">
+                <input type="checkbox" [(ngModel)]="isFuncionario" [ngModelOptions]="{standalone: true}">
+                <span class="slider"></span>
+              </label>
+              <span class="toggle-label-text" [class.active]="isFuncionario">Funcionário</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ENDEREÇO (OPCIONAL) -->
+        <div class="form-section">
+          <div class="section-header">
+            <h2 class="section-title">Endereço (Opcional)</h2>
+            <label class="toggle-label">
+              <input type="checkbox" [(ngModel)]="incluirEndereco" [ngModelOptions]="{standalone: true}">
+              <span>Incluir endereço</span>
+            </label>
+          </div>
+
+          <div *ngIf="incluirEndereco" formGroupName="endereco">
+            <div class="form-row">
+              <div class="form-group form-group-small">
+                <label for="cep">CEP</label>
+                <input
+                  type="text"
+                  id="cep"
+                  formControlName="cep"
+                  placeholder="00000-000"
+                  maxlength="9"
+                  (input)="formatarCEP($event)"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="logradouro">Logradouro</label>
+                <input
+                  type="text"
+                  id="logradouro"
+                  formControlName="logradouro"
+                  placeholder="Rua, Avenida..."
+                >
+              </div>
+
+              <div class="form-group form-group-small">
+                <label for="numero">Número</label>
+                <input
+                  type="text"
+                  id="numero"
+                  formControlName="numero"
+                  placeholder="123"
+                >
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="complemento">Complemento</label>
+                <input
+                  type="text"
+                  id="complemento"
+                  formControlName="complemento"
+                  placeholder="Apto, Bloco..."
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="bairro">Bairro</label>
+                <input
+                  type="text"
+                  id="bairro"
+                  formControlName="bairro"
+                  placeholder="Nome do bairro"
+                >
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cidade">Cidade</label>
+                <input
+                  type="text"
+                  id="cidade"
+                  formControlName="cidade"
+                  placeholder="Nome da cidade"
+                >
+              </div>
+
+              <div class="form-group form-group-small">
+                <label for="estado">Estado</label>
+                <select id="estado" formControlName="estado">
+                  <option value="">Selecione</option>
+                  <option value="AC">AC</option>
+                  <option value="AL">AL</option>
+                  <option value="AP">AP</option>
+                  <option value="AM">AM</option>
+                  <option value="BA">BA</option>
+                  <option value="CE">CE</option>
+                  <option value="DF">DF</option>
+                  <option value="ES">ES</option>
+                  <option value="GO">GO</option>
+                  <option value="MA">MA</option>
+                  <option value="MT">MT</option>
+                  <option value="MS">MS</option>
+                  <option value="MG">MG</option>
+                  <option value="PA">PA</option>
+                  <option value="PB">PB</option>
+                  <option value="PR">PR</option>
+                  <option value="PE">PE</option>
+                  <option value="PI">PI</option>
+                  <option value="RJ">RJ</option>
+                  <option value="RN">RN</option>
+                  <option value="RS">RS</option>
+                  <option value="RO">RO</option>
+                  <option value="RR">RR</option>
+                  <option value="SC">SC</option>
+                  <option value="SP">SP</option>
+                  <option value="SE">SE</option>
+                  <option value="TO">TO</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MENSAGEM DE ERRO -->
+        <div *ngIf="errorMessage" class="alert alert-error">
+          ⚠️ {{ errorMessage }}
+        </div>
+
+        <!-- BOTÕES -->
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="cancelar()" [disabled]="loading">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="loading || funcionarioForm.invalid">
+            {{ loading ? 'Cadastrando...' : '✓ Cadastrar ' + tipoUsuario }}
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </main>
+
+</div>
