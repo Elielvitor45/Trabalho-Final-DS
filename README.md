@@ -52,14 +52,23 @@ Por padrão, a aplicação ficará disponível em: [**http://localhost:4200**](h
 
 .
 ├── .vscode/
+
 ├── backend/
+
 ├── frontend/
+
 ├── .env
+
 ├── .env.properties
+
 ├── .gitignore
+
 ├── docker-compose.yml
+
 ├── Dockerfile
+
 ├── package-lock.json
+
 └── README.md
 
 - `backend/`: Código e configuração do servidor (API)
