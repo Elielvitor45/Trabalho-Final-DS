@@ -12,8 +12,8 @@
     <nav class="navbar-perfil">
       <div class="navbar-content">
         <div class="logo" (click)="goToHome()">
-        <img src="images/Logo-Carro.png" alt="Logo" class="logo-image">
-      </div>
+          <img src="images/Logo-Carro.png" alt="Logo" class="logo-image">
+        </div>
         <div class="navbar-actions">
           <button class="btn-nav" (click)="goToHome()">
             🏠 Home
@@ -41,31 +41,74 @@
 
         <!-- Informações de Contato -->
         <div class="sidebar-section">
-          <h3 class="sidebar-title">Informações Pessoais</h3>
+          <div class="section-header-inline">
+            <h3 class="sidebar-title">Informações Pessoais</h3>
+            <button class="btn-icon-mini" (click)="iniciarEdicaoDadosPessoais()" *ngIf="!editandoDadosPessoais">
+              ✏️
+            </button>
+          </div>
 
-          <div class="contact-item">
-            <span class="contact-icon">📋</span>
-            <div class="contact-info">
-              <span class="contact-label">CPF</span>
-              <span class="contact-value">{{ formatCPF(user.cpf) || 'Não informado' }}</span>
+          <!-- MODO VISUALIZAÇÃO -->
+          <div *ngIf="!editandoDadosPessoais">
+            <div class="contact-item">
+              <span class="contact-icon">📋</span>
+              <div class="contact-info">
+                <span class="contact-label">CPF</span>
+                <span class="contact-value">{{ formatCPF(user.cpf) || 'Não informado' }}</span>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <span class="contact-icon">📞</span>
+              <div class="contact-info">
+                <span class="contact-label">Telefone</span>
+                <span class="contact-value">{{ formatTelefone(user.telefone) || 'Não informado' }}</span>
+              </div>
+            </div>
+
+            <div class="contact-item">
+              <span class="contact-icon">✉️</span>
+              <div class="contact-info">
+                <span class="contact-label">Email</span>
+                <span class="contact-value">{{ user.email }}</span>
+              </div>
             </div>
           </div>
 
-          <div class="contact-item">
-            <span class="contact-icon">📞</span>
-            <div class="contact-info">
-              <span class="contact-label">Telefone</span>
-              <span class="contact-value">{{ formatTelefone(user.telefone) || 'Não informado' }}</span>
+          <!-- MODO EDIÇÃO -->
+          <form *ngIf="editandoDadosPessoais" [formGroup]="dadosPessoaisForm" (ngSubmit)="salvarDadosPessoais()" class="form-edit-mini">
+            <div class="form-group-mini">
+              <label>Nome Completo *</label>
+              <input type="text" formControlName="nome" class="input-mini">
+              <span class="form-error" *ngIf="dadosPessoaisForm.get('nome')?.invalid && dadosPessoaisForm.get('nome')?.touched">
+                Nome obrigatório (mín. 3 caracteres)
+              </span>
             </div>
-          </div>
 
-          <div class="contact-item">
-            <span class="contact-icon">✉️</span>
-            <div class="contact-info">
-              <span class="contact-label">Email</span>
-              <span class="contact-value">{{ user.email }}</span>
+            <div class="form-group-mini">
+              <label>Telefone</label>
+              <input type="text" formControlName="telefone" class="input-mini" placeholder="(00) 00000-0000">
             </div>
-          </div>
+
+            <div class="info-readonly-box">
+              <p class="info-readonly-label">Email (não editável)</p>
+              <p class="info-readonly-value">{{ user.email }}</p>
+            </div>
+
+            <div class="info-readonly-box">
+              <p class="info-readonly-label">CPF (não editável)</p>
+              <p class="info-readonly-value">{{ formatCPF(user.cpf) }}</p>
+            </div>
+
+            <div class="form-actions-mini">
+              <button type="button" class="btn-cancel-mini" (click)="cancelarEdicaoDadosPessoais()">
+                Cancelar
+              </button>
+              <button type="submit" class="btn-save-mini" [disabled]="dadosPessoaisForm.invalid || salvandoDadosPessoais">
+                {{ salvandoDadosPessoais ? 'Salvando...' : '💾 Salvar' }}
+              </button>
+            </div>
+          </form>
         </div>
 
         <!-- Estatísticas Rápidas -->

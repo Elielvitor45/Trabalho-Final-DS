@@ -23,7 +23,6 @@ export class Auth {
   ) {
     this.loadCurrentUser();
   }
-
   private loadCurrentUser(): void {
     const token = this.jwtService.getToken();
     if (token && !this.jwtService.isTokenExpired()) {

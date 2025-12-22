@@ -2,14 +2,14 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { Auth } from '../../services/auth';
 import { UsuarioPerfil } from '../../models/user.model';
 import { EstatisticasDTO } from '../../dto/auth.dto';
-import { LocacaoDTO, StatusLocacao } from '../../dto/locacao.dto';   // ✅ Adicionado
-import { VeiculoDTO } from '../../dto/veiculo.dto';                 // ✅ Adicionado
+import { LocacaoDTO, StatusLocacao } from '../../dto/locacao.dto';
+import { VeiculoDTO } from '../../dto/veiculo.dto';
 import { LocacaoService } from '../../services/locacao';
 import { VeiculoService } from '../../services/veiculo';
-
 
 @Component({
   selector: 'app-perfil',
@@ -19,13 +19,22 @@ import { VeiculoService } from '../../services/veiculo';
   styleUrls: ['./perfil.css']
 })
 export class Perfil implements OnInit {
+  private apiUrl = 'http://localhost:8080/api/usuarios';
+  
   loading = true;
   errorMessage = '';
   successMessage = '';
   user: UsuarioPerfil | null = null;
+  
+  // Edição de endereço
   editandoEndereco = false;
   salvandoEndereco = false;
   enderecoForm!: FormGroup;
+
+  // Edição de dados pessoais
+  editandoDadosPessoais = false;
+  salvandoDadosPessoais = false;
+  dadosPessoaisForm!: FormGroup;
 
   locacoes: LocacaoDTO[] = [];
   estatisticas: EstatisticasDTO | null = null;
@@ -39,9 +48,11 @@ export class Perfil implements OnInit {
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
     private locacaoService: LocacaoService,
-    private veiculoService: VeiculoService
+    private veiculoService: VeiculoService,
+    private http: HttpClient
   ) {
     this.initEnderecoForm();
+    this.initDadosPessoaisForm();
   }
 
   ngOnInit(): void {
@@ -63,6 +74,13 @@ export class Perfil implements OnInit {
       bairro: ['', [Validators.required]],
       cidade: ['', [Validators.required]],
       estado: ['', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]]
+    });
+  }
+
+  initDadosPessoaisForm(): void {
+    this.dadosPessoaisForm = this.fb.group({
+      nome: ['', [Validators.required, Validators.minLength(3)]],
+      telefone: ['']
     });
   }
 
@@ -173,32 +191,72 @@ export class Perfil implements OnInit {
     this.cdr.detectChanges();
   }
 
-  getStatusClass(status: StatusLocacao): string {
-    switch (status) {
-      case 'ATIVA':
-        return 'status-ativa';
-      case 'FINALIZADA':
-        return 'status-finalizada';
-      case 'CANCELADA':
-        return 'status-cancelada';
-      default:
-        return 'status-default';
+  // ==================== DADOS PESSOAIS ====================
+
+  iniciarEdicaoDadosPessoais(): void {
+    this.editandoDadosPessoais = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    if (this.user) {
+      this.dadosPessoaisForm.patchValue({
+        nome: this.user.nome,
+        telefone: this.user.telefone || ''
+      });
     }
   }
 
-  formatarData(data: string | Date): string {
-    if (!data) return '';
-    const date = new Date(data);
-    return date.toLocaleDateString('pt-BR');
+  cancelarEdicaoDadosPessoais(): void {
+    this.editandoDadosPessoais = false;
+    this.dadosPessoaisForm.reset();
+    this.errorMessage = '';
+    this.successMessage = '';
   }
 
-  formatarValor(valor: number): string {
-    if (valor === null || valor === undefined) return 'R$ 0,00';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor);
+  salvarDadosPessoais(): void {
+    if (this.dadosPessoaisForm.invalid || !this.user) {
+      alert('Preencha todos os campos obrigatórios corretamente.');
+      return;
+    }
+
+    this.salvandoDadosPessoais = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const payload = {
+      nome: this.dadosPessoaisForm.value.nome.trim(),
+      telefone: this.dadosPessoaisForm.value.telefone ? this.dadosPessoaisForm.value.telefone.trim() : null,
+      dataNascimento: this.user.dataNascimento || null,
+      email: this.user.email,
+      cpf: this.user.cpf,
+      senha: this.user.senha || 'senha-nao-alterada-placeholder-123'
+    };
+
+    console.log('💾 Salvando alterações dos dados pessoais:', payload);
+
+    this.http.put(`${this.apiUrl}/perfil`, payload).subscribe({
+      next: (response) => {
+        console.log('✅ Dados pessoais atualizados com sucesso:', response);
+        this.successMessage = 'Dados atualizados com sucesso!';
+        this.salvandoDadosPessoais = false;
+        this.editandoDadosPessoais = false;
+        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.loadUserProfile();
+          this.successMessage = '';
+        }, 2000);
+      },
+      error: (error) => {
+        console.error('❌ Erro ao atualizar dados pessoais:', error);
+        this.errorMessage = error.error?.message || error.error?.senha || 'Erro ao atualizar dados. Tente novamente.';
+        this.salvandoDadosPessoais = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
+
+  // ==================== ENDEREÇO ====================
 
   iniciarEdicaoEndereco(): void {
     this.editandoEndereco = true;
@@ -229,7 +287,7 @@ export class Perfil implements OnInit {
 
   salvarEndereco(): void {
     if (this.enderecoForm.invalid) {
-      this.markFormAsTouched();
+      this.markFormAsTouched(this.enderecoForm);
       return;
     }
 
@@ -260,11 +318,13 @@ export class Perfil implements OnInit {
     });
   }
 
-  markFormAsTouched(): void {
-    Object.keys(this.enderecoForm.controls).forEach(key => {
-      this.enderecoForm.get(key)?.markAsTouched();
+  markFormAsTouched(form: FormGroup): void {
+    Object.keys(form.controls).forEach(key => {
+      form.get(key)?.markAsTouched();
     });
   }
+
+  // ==================== FORMATAÇÃO ====================
 
   formatCPF(cpf: string): string {
     if (!cpf) return '';
@@ -289,12 +349,33 @@ export class Perfil implements OnInit {
     event.target.value = value;
   }
 
-  goToHome(): void {
-    this.router.navigate(['/home']);
+  // ==================== HISTÓRICO ====================
+
+  getStatusClass(status: StatusLocacao): string {
+    switch (status) {
+      case 'ATIVA':
+        return 'status-ativa';
+      case 'FINALIZADA':
+        return 'status-finalizada';
+      case 'CANCELADA':
+        return 'status-cancelada';
+      default:
+        return 'status-default';
+    }
   }
 
-  logout(): void {
-    this.authService.logout();
+  formatarData(data: string | Date): string {
+    if (!data) return '';
+    const date = new Date(data);
+    return date.toLocaleDateString('pt-BR');
+  }
+
+  formatarValor(valor: number): string {
+    if (valor === null || valor === undefined) return 'R$ 0,00';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(valor);
   }
 
   desativarLocacao(locacao: LocacaoDTO): void {
@@ -312,15 +393,15 @@ export class Perfil implements OnInit {
             this.veiculoService.updateDisponibilidade(locacao.veiculo.id, true).subscribe({
               next: (veiculoAtualizado: VeiculoDTO) => {
                 console.log('Veículo marcado como disponível:', veiculoAtualizado);
-                this.atualizarPagina();  
+                this.atualizarPagina();
               },
               error: (err) => {
                 console.error('Erro ao atualizar disponibilidade:', err);
-                this.atualizarPagina();  
+                this.atualizarPagina();
               }
             });
           } else {
-            this.atualizarPagina();  
+            this.atualizarPagina();
           }
         },
         error: (err) => {
@@ -331,24 +412,22 @@ export class Perfil implements OnInit {
     }
   }
 
-  /**
-   * Atualiza histórico e estatísticas
-   */
   private atualizarPagina(): void {
-    // Limpa o array de locações para forçar reload
     this.locacoes = [];
     this.mostrarHistorico = false;
-
-    // Recarrega estatísticas
     this.loadEstatisticas();
-
-    // Recarrega histórico
     this.loadHistoricoLocacoes();
-
-    // Força detecção de mudanças
     this.cdr.detectChanges();
-
     console.log('✅ Página atualizada com sucesso');
   }
 
+  // ==================== NAVEGAÇÃO ====================
+
+  goToHome(): void {
+    this.router.navigate(['/home']);
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
 }
