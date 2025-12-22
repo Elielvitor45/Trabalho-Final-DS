@@ -2,8 +2,8 @@
 
 Antes de executar o projeto, certifique-se de ter instalado:
 
-- **Docker** e **Docker Compose** (necessários para subir o backend com containers)
-- **Node.js** e **npm** (necessários para gerenciar dependências do frontend)
+- **Docker** (necessários para subir o backend com containers)
+- **Node.js** (necessários para gerenciar dependências do frontend)
 - **Angular CLI** (para executar o servidor de desenvolvimento do frontend)
 
 Instalação da Angular CLI (caso ainda não tenha):
