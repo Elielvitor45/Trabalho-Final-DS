@@ -10,8 +10,6 @@ Instalação da Angular CLI (caso ainda não tenha):
 
 npm install -g @angular/cli
 
-text
-
 ---
 
 ## 🐳 Executando o Backend (Docker)
@@ -22,15 +20,11 @@ Na raiz do projeto, execute:
 
 docker compose up --build
 
-text
-
 Esse comando irá criar e iniciar os containers definidos no `docker-compose.yml`, reconstruindo as imagens para aplicar alterações recentes no código.
 
 Para parar os containers:
 
 docker compose down
-
-text
 
 ---
 
@@ -42,19 +36,13 @@ O frontend está localizado na pasta `frontend`.
 
 cd frontend
 
-text
-
 2. Instale as dependências:
 
 npm install
 
-text
-
 3. Inicie o servidor de desenvolvimento:
 
 ng serve
-
-text
 
 Por padrão, a aplicação ficará disponível em: [**http://localhost:4200**](http://localhost:4200)
 
@@ -73,8 +61,6 @@ Por padrão, a aplicação ficará disponível em: [**http://localhost:4200**](h
 ├── Dockerfile
 ├── package-lock.json
 └── README.md
-
-text
 
 - `backend/`: Código e configuração do servidor (API)
 - `frontend/`: Aplicação Angular (interface do usuário)
