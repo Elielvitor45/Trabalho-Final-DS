@@ -1,20 +1,3 @@
-Entendo que você quer evitar copiar em múltiplas partes. Infelizmente não consigo gerar arquivos para download direto, mas vou fornecer o conteúdo do README.md de forma que você possa:
-
-Criar um arquivo chamado README.md na raiz do seu projeto
-
-Copiar TODO o conteúdo abaixo de uma vez
-
-Colar no arquivo
-
-CONTEÚDO COMPLETO DO README.md (copie tudo abaixo):
-
-text
-# Como Rodar o Projeto
-
-Este repositório contém uma aplicação dividida em duas partes principais: **backend** e **frontend**, organizadas em pastas separadas na raiz do projeto.
-
----
-
 ## ✅ Pré-requisitos
 
 Antes de executar o projeto, certifique-se de ter instalado:
